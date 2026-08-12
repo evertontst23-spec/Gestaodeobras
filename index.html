@@ -1909,7 +1909,11 @@ function salvarFunc(){
   if(eIDs.f){
     Object.assign(db.funcionarios.find(x=>x.id===eIDs.f),obj);
   } else {
-    obj.id=db.nids.f++;
+    // Calcular próximo ID baseado no maior existente para evitar conflito
+    const maxId = db.funcionarios.length > 0 ? Math.max(...db.funcionarios.map(x=>x.id||0)) : 0;
+    const maxEntId = db.entregas.length > 0 ? Math.max(...db.entregas.map(x=>x.fid||0)) : 0;
+    obj.id = Math.max(maxId, maxEntId, db.nids.f) + 1;
+    db.nids.f = obj.id + 1;
     obj.face=null;
     db.funcionarios.push(obj);
   }
