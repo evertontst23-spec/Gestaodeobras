@@ -929,13 +929,13 @@ input:hover:not([readonly]):not(:focus){border-color:var(--bd2)}
     </button>
     <button type="button" onclick="trocarObra('vila_motorista')" id="sbobra-vila_motorista"
       style="display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:7px;border:1.5px solid transparent;background:transparent;cursor:pointer;font-family:inherit;text-align:left;width:100%">
-      <span style="font-size:14px">🚗</span>
-      <span style="font-size:11px;font-weight:500;color:#4a6fa5">Gestão de Obra</span>
+      <span style="font-size:14px">🏛️</span>
+      <span style="font-size:11px;font-weight:500;color:#4a6fa5">Praça da Bandeira</span>
     </button>
     <button type="button" onclick="trocarObra('campo_cafe')" id="sbobra-campo_cafe"
       style="display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:7px;border:1.5px solid transparent;background:transparent;cursor:pointer;font-family:inherit;text-align:left;width:100%">
       <span style="font-size:14px">☕</span>
-      <span style="font-size:11px;font-weight:500;color:#4a6fa5">Gestão de Obra</span>
+      <span style="font-size:11px;font-weight:500;color:#4a6fa5">Campo do Café</span>
     </button>
   </div>
 </div>
@@ -4116,9 +4116,9 @@ function mostrarStatusSync(ok){
 ══════════════════════════════════════ */
 
 const OBRAS = {
-  vila_brasil:    { id:'vila_brasil',    nome:'Urbanização Vila Brasil', nome_curto:'Vila Brasil',      empresa:'Construtora Mardifi Ltda', programa:'ProMorar · Prefeitura do Recife', icone:'🏗️', cor:'#2563eb', sk:'kb_vb' },
-  vila_motorista: { id:'vila_motorista', nome:'Praça da Bandeira',       nome_curto:'Praça Bandeira',   empresa:'Construtora Mardifi Ltda', programa:'Prefeitura do Recife',           icone:'🏛️', cor:'#059669', sk:'kb_vm' },
-  campo_cafe:     { id:'campo_cafe',     nome:'Campo do Café',           nome_curto:'Campo do Café',    empresa:'Construtora Mardifi Ltda', programa:'Prefeitura do Recife',           icone:'☕', cor:'#d97706', sk:'kb_cc' }
+  vila_brasil:    { id:'vila_brasil',    nome:'Urbanização Vila Brasil', nome_curto:'Vila Brasil',        empresa:'Construtora Mardifi Ltda', programa:'ProMorar · Prefeitura do Recife', icone:'🏗️', cor:'#2563eb', sk:'kb_vb' },
+  vila_motorista: { id:'vila_motorista', nome:'Praça da Bandeira',       nome_curto:'Praça da Bandeira',  empresa:'Construtora Mardifi Ltda', programa:'Prefeitura do Recife',           icone:'🏛️', cor:'#059669', sk:'kb_vm' },
+  campo_cafe:     { id:'campo_cafe',     nome:'Campo do Café',           nome_curto:'Campo do Café',      empresa:'Construtora Mardifi Ltda', programa:'Prefeitura do Recife',           icone:'☕', cor:'#d97706', sk:'kb_cc' }
 };
 
 let obraAtual = null;
