@@ -1775,10 +1775,19 @@ async function confirmarEpiEntrega(){
   // Usar foto capturada no momento do reconhecimento
   let facialImg = epiFotoCapturada || null;
   epiFotoCapturada = null; // limpar após usar
-  const entReg = {id:db.nids.ent++,fid,eid,qty,dt,mot:document.getElementById('ef_mot').value,obs:document.getElementById('ef_obs').value,st:'Entregue',auth:{tp:epiAtp,ts,assinatura:assinaturaImg,facial:facialImg,funcNome:db.funcionarios.find(x=>x.id===fid)?.nome||''},hash};
-  db.entregas.push(entReg);sv();
+  // Calcular ID único para a entrega
+  const maxEntId = db.entregas.length > 0 ? Math.max(...db.entregas.map(x=>x.id||0)) : 0;
+  const novoEntId = Math.max(maxEntId, db.nids.ent) + 1;
+  db.nids.ent = novoEntId + 1;
+  
+  const entReg = {id:novoEntId,fid,eid,qty,dt,mot:document.getElementById('ef_mot').value,obs:document.getElementById('ef_obs').value,st:'Entregue',auth:{tp:epiAtp,ts,assinatura:assinaturaImg,facial:facialImg,funcNome:db.funcionarios.find(x=>x.id===fid)?.nome||''},hash};
+  db.entregas.push(entReg);
+  sv();
+  console.log('[EPI] Entrega salva:', entReg.id, '— Total entregas:', db.entregas.length);
   sbEntrega(entReg);
-  toast('Entrega registrada!');limparFormEpi();updBdgEpi();
+  toast('✅ Entrega registrada!');
+  limparFormEpi();
+  updBdgEpi();
 }
 
 /* epi hist */
@@ -4784,6 +4793,60 @@ async function salvarFichaPDF(){
 </body>
 </html>`);
   janela.document.close();
+}
+
+
+/* ══════════════════════════════════════
+   CORREÇÃO DE IDs DUPLICADOS
+   Roda automaticamente ao carregar
+══════════════════════════════════════ */
+function corrigirIdsDuplicados(){
+  let alterado = false;
+
+  // Corrigir IDs de entregas duplicados
+  const idsVistos = new Set();
+  let proximoId = db.entregas.length > 0 ? Math.max(...db.entregas.map(x=>x.id||0)) + 1 : 1;
+  
+  db.entregas.forEach(e => {
+    if(!e.id || idsVistos.has(e.id)){
+      e.id = proximoId++;
+      alterado = true;
+    }
+    idsVistos.add(e.id);
+  });
+
+  // Corrigir IDs de ponto duplicados
+  const idsVitosPonto = new Set();
+  let proximoPt = db.ponto.length > 0 ? Math.max(...db.ponto.map(x=>x.id||0)) + 1 : 1;
+  db.ponto.forEach(p => {
+    if(!p.id || idsVitosPonto.has(p.id)){
+      p.id = proximoPt++;
+      alterado = true;
+    }
+    idsVitosPonto.add(p.id);
+  });
+
+  // Atualizar nids para sempre partir do maior existente
+  if(db.entregas.length > 0){
+    db.nids.ent = Math.max(...db.entregas.map(x=>x.id||0)) + 1;
+  }
+  if(db.ponto.length > 0){
+    db.nids.pt = Math.max(...db.ponto.map(x=>x.id||0)) + 1;
+  }
+  if(db.funcionarios.length > 0){
+    db.nids.f = Math.max(...db.funcionarios.map(x=>x.id||0)) + 1;
+  }
+  if(db.epis.length > 0){
+    db.nids.epi = Math.max(...db.epis.map(x=>x.id||0)) + 1;
+  }
+  if(db.materiais.length > 0){
+    db.nids.mat = Math.max(...db.materiais.map(x=>x.id||0)) + 1;
+  }
+
+  if(alterado){
+    sv();
+    console.log('[IDs] Duplicados corrigidos — nids atualizados:', db.nids);
+  }
 }
 
 /* ══════════════════════════════════════
