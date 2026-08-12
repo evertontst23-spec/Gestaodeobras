@@ -17,6 +17,8 @@
 <title>Kairon SST — Urbanização Vila Brasil · Mardifi</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap');
 
@@ -982,7 +984,8 @@ input:hover:not([readonly]):not(:focus){border-color:var(--bd2)}
     <div id="page-dashboard" class="page active"><div class="sg" id="dashSg"></div><div class="g2" style="margin-bottom:14px"><div class="card"><div class="ch"><h3>Ponto — Hoje</h3><span id="dashHoje" style="font-size:11px;color:var(--mu)"></span></div><div id="dashPonto" style="max-height:230px;overflow-y:auto"></div></div><div class="card"><div class="ch"><h3>Financeiro — Mês</h3></div><div class="cb" id="dashFin"></div></div></div><div class="g2"><div class="card"><div class="ch"><h3>Almoxarifado — Recentes</h3></div><div id="dashAlmo" style="max-height:200px;overflow-y:auto"></div></div><div class="card"><div class="ch"><h3>Alertas</h3></div><div id="dashAlert" style="max-height:200px;overflow-y:auto"></div></div></div></div>
     <div id="page-ponto" class="page"><div class="ponto-bx"><div class="rl-clk" id="rlClk">--:--:--</div><div class="rl-dt" id="rlDt"></div><div class="cam-w"><video id="pontoVid" autoplay muted playsinline></video><canvas id="pontoCanvas"></canvas><div class="face-r" id="pontoRing"></div><div class="cam-ov"><div class="cam-st" id="pontoSt">Aguardando...</div></div></div><div style="margin-top:12px;display:flex;gap:8px;justify-content:center"><button class="btn bp" onclick="iniciarPonto()" id="btnPonto">▶ Iniciar</button><button class="btn bo hidden" onclick="pararPonto()" id="btnStopPonto">Parar</button></div><div id="pontoRes" class="hidden" style="margin-top:12px"></div></div></div>
     <div id="page-rel-ponto" class="page"><div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap"><input type="month" id="filPontoMes" style="width:148px" onchange="renderRelPonto()"><div class="sw" style="flex:1;min-width:160px"><svg class="si" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input id="buscaRP" placeholder="Buscar funcionário..." oninput="renderRelPonto()"></div><button class="btn bo bsm no-print" onclick="window.print()">🖨️</button>
-        <button class="btn bs no-print" onclick="abrirModoFiscalizacao()" style="background:#7c3aed">🔍 Modo Fiscalização</button></div><div class="card tw"><table><thead><tr><th>Funcionário</th><th>Data</th><th>Entrada</th><th>Saída</th><th>Horas</th><th>Método</th><th></th></tr></thead><tbody id="tbPonto"></tbody></table></div></div>
+        <button class="btn bs no-print" onclick="abrirModoFiscalizacao()" style="background:#7c3aed">🔍 Modo Fiscalização</button>
+        <button class="btn bs no-print" onclick="salvarFichaPDF()" style="background:#dc2626">📄 Salvar PDF</button></div><div class="card tw"><table><thead><tr><th>Funcionário</th><th>Data</th><th>Entrada</th><th>Saída</th><th>Horas</th><th>Método</th><th></th></tr></thead><tbody id="tbPonto"></tbody></table></div></div>
     <div id="page-epi-entrega" class="page"><div class="card" style="max-width:580px"><div class="ch"><h2>Registrar Entrega de EPI</h2></div><div class="cb"><div class="fr2"><div class="fg"><label class="fl">Funcionário *</label><select id="ef_func" onchange="onFuncChg()"><option value="">Selecione...</option></select></div><div class="fg"><label class="fl">Matrícula</label><input id="ef_mat" readonly></div></div><div class="fr2"><div class="fg"><label class="fl">EPI *</label><select id="ef_epi" onchange="onEpiChg()"><option value="">Selecione...</option></select></div><div class="fg"><label class="fl">Nº CA</label><input id="ef_ca" readonly></div></div><div class="fr3"><div class="fg"><label class="fl">Quantidade *</label><input type="number" id="ef_qty" min="1" value="1"></div><div class="fg"><label class="fl">Data</label><input type="date" id="ef_data"></div><div class="fg"><label class="fl">Motivo</label><select id="ef_mot"><option>1ª Entrega</option><option>Reposição</option><option>Desgaste</option><option>Perda</option><option>Vencimento</option></select></div></div><div class="fg"><label class="fl">Observação</label><input id="ef_obs" placeholder="Opcional"></div><div class="fg"><label class="fl">Confirmação de Identidade *</label><div id="epiAuthBox" style="border:2px dashed var(--bd2);border-radius:var(--r);padding:16px;text-align:center;transition:all .3s">
               <div style="font-size:32px;margin-bottom:6px">📷</div>
               <div style="font-size:13px;font-weight:600;color:var(--tx)" id="epiAS">Reconhecimento facial obrigatório</div>
@@ -4571,6 +4574,156 @@ async function sbEntrega(e){
       hash:e.hash
     });
   }catch(e){}
+}
+
+
+/* ══════════════════════════════════════
+   GERAR PDF DA FICHA DE EPI
+══════════════════════════════════════ */
+async function salvarFichaPDF(){
+  const fid = parseInt(document.getElementById('fichaSelect')?.value);
+  const f = db.funcionarios.find(x=>x.id===fid);
+  if(!f){ toast('Selecione um funcionário','w'); return; }
+
+  toast('⏳ Gerando PDF...');
+
+  const entregas = db.entregas.filter(e=>e.fid===fid);
+  const hoje = new Date().toLocaleString('pt-BR');
+
+  // Criar janela com o conteúdo completo para converter em PDF
+  const janela = window.open('','_blank','width=900,height=700');
+  
+  const estilos = `
+    <style>
+      *{box-sizing:border-box;margin:0;padding:0}
+      body{font-family:Arial,sans-serif;padding:20px;color:#111;background:#fff;font-size:12px}
+      .cabecalho{background:#1a56db;color:#fff;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;border-radius:8px 8px 0 0;margin-bottom:0}
+      .sub-cab{background:#1648c0;color:#fff;padding:6px 16px;font-size:10px;font-weight:700;border-bottom:3px solid #f59e0b;margin-bottom:16px}
+      .dados-worker{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:16px;padding:10px;background:#f8faff;border-radius:6px;border:1px solid #e0e2e8}
+      .dado-label{font-size:9px;color:#6b7280;text-transform:uppercase;font-weight:700}
+      .dado-valor{font-size:12px;font-weight:600;color:#111}
+      .declaracao{background:#fffbeb;border:1px solid #fcd34d;border-radius:6px;padding:8px;font-size:10px;color:#92400e;margin-bottom:16px;line-height:1.5}
+      .titulo-secao{font-size:11px;font-weight:700;color:#1a56db;text-transform:uppercase;border-bottom:2px solid #1a56db;padding-bottom:4px;margin-bottom:10px}
+      .entrega-card{border:1.5px solid #dcfce7;border-radius:8px;margin-bottom:12px;overflow:hidden}
+      .entrega-header{background:#15803d;color:#fff;padding:7px 12px;display:flex;justify-content:space-between;font-size:11px;font-weight:700}
+      .entrega-body{padding:10px 12px}
+      .entrega-info{display:flex;gap:16px;margin-bottom:10px;font-size:11px}
+      .conf-box{background:#fff;border:1px solid #dcfce7;border-radius:6px;padding:8px}
+      .conf-titulo{font-size:9px;font-weight:700;color:#6b7280;text-transform:uppercase;margin-bottom:6px}
+      .conf-conteudo{display:flex;align-items:center;gap:10px}
+      .conf-foto{width:70px;height:70px;border-radius:6px;object-fit:cover;border:2px solid #22c55e;flex-shrink:0}
+      .conf-foto-placeholder{width:70px;height:70px;border-radius:6px;background:#f0fdf4;border:2px solid #22c55e;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0}
+      .conf-nome{font-size:12px;font-weight:700;color:#15803d;margin-bottom:3px}
+      .conf-data{font-size:10px;color:#374151;margin-bottom:4px}
+      .badges{display:flex;gap:5px;flex-wrap:wrap}
+      .badge{font-size:9px;padding:2px 6px;border-radius:10px;font-weight:600}
+      .badge-blue{background:#dbeafe;color:#1d4ed8}
+      .badge-green{background:#dcfce7;color:#15803d}
+      .badge-purple{background:#f3e8ff;color:#7c3aed}
+      .hash-box{margin-top:8px;padding:5px 8px;background:#f8faff;border-radius:4px;border-left:3px solid #15803d}
+      .hash-label{font-size:8px;color:#6b7280;font-weight:700;margin-bottom:2px}
+      .hash-valor{font-size:8px;font-family:monospace;color:#374151;word-break:break-all}
+      .rodape{margin-top:20px;padding-top:10px;border-top:1px solid #e0e2e8;display:flex;justify-content:space-between;font-size:9px;color:#6b7280}
+      @media print{body{padding:10px}}
+    </style>
+  `;
+
+  const entregasHtml = entregas.map((e,i) => {
+    const ep = db.epis.find(x=>x.id===e.eid)||{};
+    const auth = e.auth||{};
+    const dtFmt = auth.ts ? new Date(auth.ts).toLocaleString('pt-BR') : (e.dt||'—');
+    const statusCor = e.st==='Devolvido' ? '#2563eb' : '#15803d';
+    const statusBg = e.st==='Devolvido' ? '#1d4ed8' : '#15803d';
+    
+    const fotoHtml = auth.facial && auth.facial.length > 100
+      ? `<img src="${auth.facial}" class="conf-foto" alt="Foto facial">`
+      : `<div class="conf-foto-placeholder">👤</div>`;
+
+    return `
+    <div class="entrega-card">
+      <div class="entrega-header" style="background:${statusBg}">
+        <span>ENTREGA #${String(i+1).padStart(2,'0')} — ${ep.nome||'EPI'}</span>
+        <span>${e.st||'Entregue'}</span>
+      </div>
+      <div class="entrega-body">
+        <div class="entrega-info">
+          <span><strong>CA:</strong> ${ep.ca||'—'}</span>
+          <span><strong>Qtd:</strong> ${e.qty||1} un.</span>
+          <span><strong>Motivo:</strong> ${e.mot||'—'}</span>
+          <span><strong>Data:</strong> ${e.dt||'—'}</span>
+        </div>
+        <div class="conf-box">
+          <div class="conf-titulo">Confirmação de Recebimento</div>
+          <div class="conf-conteudo">
+            ${fotoHtml}
+            <div>
+              <div class="conf-nome">✅ Identidade Confirmada — ${auth.tp==='facial'?'Reconhecimento Facial':'Confirmação Digital'}</div>
+              <div class="conf-data"><strong>${f.nome}</strong> — Mat. ${f.mat||'N/A'}</div>
+              <div class="conf-data">📅 ${dtFmt}</div>
+              <div class="badges">
+                <span class="badge badge-blue">Lei 14.063/2020</span>
+                <span class="badge badge-green">NR-6 · 6.6.1</span>
+                <span class="badge badge-purple">Ass. Eletrônica Avançada</span>
+              </div>
+            </div>
+          </div>
+          <div class="hash-box">
+            <div class="hash-label">🔐 HASH SHA-256 — Integridade do Registro</div>
+            <div class="hash-valor">${e.hash||'não gerado'}</div>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+
+  janela.document.write(`<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Ficha EPI — ${f.nome}</title>
+  ${estilos}
+</head>
+<body>
+  <div class="cabecalho">
+    <div>
+      <div style="font-size:15px;font-weight:800">⚡ KAIRON SST</div>
+      <div style="font-size:9px;opacity:.8">Consultoria e Gestão em Segurança do Trabalho</div>
+    </div>
+    <div style="text-align:right">
+      <div style="font-size:13px;font-weight:700">FICHA DE CONTROLE DE EPI</div>
+      <div style="font-size:9px;opacity:.8">NR-6 / CLT Art.166 / Lei 14.063/2020</div>
+    </div>
+  </div>
+  <div class="sub-cab">
+    CONSTRUTORA MARDIFI LTDA &nbsp;·&nbsp; ${obraAtual?.nome||'URBANIZAÇÃO VILA BRASIL'} &nbsp;·&nbsp; ${obraAtual?.programa||'ProMorar · Prefeitura do Recife'}
+  </div>
+
+  <div class="titulo-secao">Dados do Trabalhador</div>
+  <div class="dados-worker">
+    <div><div class="dado-label">Nome Completo</div><div class="dado-valor">${f.nome}</div></div>
+    <div><div class="dado-label">Matrícula</div><div class="dado-valor">${f.mat||'—'}</div></div>
+    <div><div class="dado-label">CPF</div><div class="dado-valor">${f.cpf||'—'}</div></div>
+    <div><div class="dado-label">Função / Cargo</div><div class="dado-valor">${f.funcao||'—'}</div></div>
+    <div><div class="dado-label">Setor / Obra</div><div class="dado-valor">${f.setor||'—'}</div></div>
+    <div><div class="dado-label">Total de Entregas</div><div class="dado-valor">${entregas.filter(e=>e.st!=='Devolvido').length} ativo(s) · ${entregas.filter(e=>e.st==='Devolvido').length} devolvido(s)</div></div>
+  </div>
+
+  <div class="declaracao">
+    <strong>Declaração:</strong> O trabalhador acima identificado recebeu os EPIs listados nesta ficha, comprometendo-se a utilizá-los corretamente, conservá-los, comunicar ao empregador qualquer alteração que os torne impróprios para uso e cumprir as determinações do empregador sobre o assunto, nos termos da NR-6 e do Art.166 da CLT. A autenticação digital tem validade jurídica conforme a <strong>Lei 14.063/2020</strong>.
+  </div>
+
+  <div class="titulo-secao">Confirmações Digitais de Recebimento</div>
+  ${entregasHtml || '<p style="color:#999;text-align:center;padding:20px">Nenhuma entrega registrada</p>'}
+
+  <div class="rodape">
+    <span>Gerado em: ${hoje} · Kairon SST v4.0 · gestaodeobras03.netlify.app</span>
+    <span>NR-6 · Portaria MTE 3.214/78 · CLT Art.166 · Lei 14.063/2020</span>
+  </div>
+
+  <script>window.onload=function(){setTimeout(function(){window.print();},600);}<\/script>
+</body>
+</html>`);
+  janela.document.close();
 }
 
 /* ══════════════════════════════════════
