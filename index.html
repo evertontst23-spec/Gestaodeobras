@@ -1963,7 +1963,7 @@ function gerarAssinaturasDigitais(f, entregas){
     const ep = db.epis.find(x=>x.id===e.eid)||{};
     const auth = e.auth || {};
     const dtFmt = auth.ts ? new Date(auth.ts).toLocaleString('pt-BR') : (e.dt||'—');
-    const cor = e.st==='Devolvido' ? '#2563eb' : '#15803d';
+    const cor = e.st==='Devolvido' ? '#1d4ed8' : '#15803d';
     const bgCor = e.st==='Devolvido' ? '#eff6ff' : '#f0fdf4';
     
     // FOTO: tentar pegar facial ou placeholder
@@ -2031,6 +2031,22 @@ function gerarAssinaturasDigitais(f, entregas){
         </div>
 
         ${e.obs?`<div style="margin-top:8px;font-size:12px;color:#6b7280"><strong>Obs:</strong> ${e.obs}</div>`:''}
+        
+        ${e.st==='Devolvido' && e.dtDevolucao ? `
+        <div style="margin-top:10px;background:#eff6ff;border:1.5px solid #2563eb;border-radius:8px;padding:10px 12px">
+          <div style="font-size:10px;font-weight:700;color:#1d4ed8;text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px">↩ Registro de Devolução</div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <div style="font-size:24px">📦</div>
+            <div>
+              <div style="font-size:12px;font-weight:700;color:#1d4ed8">EPI Devolvido ao Almoxarifado</div>
+              <div style="font-size:11px;color:#374151;margin-top:2px">
+                📅 Data: <strong>${e.dtDevolucao}</strong>${e.hrDevolucao?' às <strong>'+e.hrDevolucao+'</strong>':''}
+              </div>
+              <div style="font-size:11px;color:#374151">📦 Quantidade: <strong>${e.qty||1} un.</strong> devolvida(s)</div>
+              <div style="font-size:10px;color:#6b7280;margin-top:4px">Estoque atualizado automaticamente</div>
+            </div>
+          </div>
+        </div>` : ''}
       </div>
     </div>`;
   }).join('');
@@ -2114,23 +2130,27 @@ function devolverEpi(entregaId, funcId){
   const ep = db.epis.find(x=>x.id===e.eid)||{};
   const f = db.funcionarios.find(x=>x.id===funcId)||{};
   
-  if(!confirm(`Registrar devolução de "${ep.nome}" por ${f.nome}?\n\nO item voltará ao estoque automaticamente.`)) return;
+  if(!confirm(`↩ DEVOLUÇÃO DE EPI\n\nFuncionário: ${f.nome}\nEPI: ${ep.nome} (CA ${ep.ca||'—'})\nQuantidade: ${e.qty||1} un.\n\nConfirmar devolução? O item voltará ao estoque.`)) return;
   
-  // Marcar como devolvido
+  const agora = new Date();
+  const dtDev = agora.toLocaleDateString('pt-BR');
+  const hrDev = agora.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+  
+  // Marcar como devolvido com data/hora
   e.st = 'Devolvido';
-  e.dtDevolucao = dHj();
+  e.dtDevolucao = dtDev;
+  e.hrDevolucao = hrDev;
+  e.tsDevolucao = agora.toISOString();
   
   // Devolver ao estoque
   const epi = db.epis.find(x=>x.id===e.eid);
   if(epi){ epi.qty += (e.qty||1); }
   
   sv();
+  renderFicha();
+  updBdgEpi();
   
-  // Atualizar ficha na tela
-  const sel = document.getElementById('fichaSelect');
-  if(sel) renderFicha();
-  
-  toast(`✅ ${ep.nome} devolvido — estoque atualizado!`);
+  toast(`✅ ${ep.nome} devolvido em ${dtDev} às ${hrDev} — estoque atualizado!`);
 }
 
 /* ── FICHA INDIVIDUAL DE EPI ── */
@@ -2160,14 +2180,19 @@ function renderFicha(){
     entregas.forEach((e,i)=>{
       const ep=db.epis.find(x=>x.id===e.eid)||{};
       const authLabel=e.auth?.tp==='facial'?'Reconhecimento Facial':'Assinatura Digital';
-      linhas+=`<tr style="border-bottom:1px solid #ccc">
+      linhas+=`<tr style="border-bottom:1px solid #ccc;background:${e.st==='Devolvido'?'#eff6ff':'#fff'}">
         <td style="padding:6px 8px;text-align:center;font-size:12px">${i+1}</td>
-        <td style="padding:6px 8px;font-size:12px">${e.dt}</td>
+        <td style="padding:6px 8px;font-size:12px">
+          ${e.dt}
+          ${e.st==='Devolvido'&&e.dtDevolucao?`<br><span style="font-size:9px;color:#1d4ed8;font-weight:600">↩ Dev: ${e.dtDevolucao}${e.hrDevolucao?' '+e.hrDevolucao:''}</span>`:''}
+        </td>
         <td style="padding:6px 8px;font-size:12px;font-weight:600">${ep.nome||'—'}</td>
         <td style="padding:6px 8px;font-size:11px;text-align:center">${ep.ca||'—'}</td>
         <td style="padding:6px 8px;font-size:12px;text-align:center">${e.qty}</td>
         <td style="padding:6px 8px;font-size:11px">${e.mot||'—'}</td>
-        <td style="padding:6px 8px;font-size:11px;text-align:center"><span style="background:${e.st==='Entregue'?'#dcfce7':'#dbeafe'};color:${e.st==='Entregue'?'#15803d':'#1a56db'};padding:2px 7px;border-radius:12px;font-size:10px;font-weight:600">${e.st}</span></td>
+        <td style="padding:6px 8px;font-size:11px;text-align:center">
+          <span style="background:${e.st==='Entregue'?'#dcfce7':e.st==='Devolvido'?'#dbeafe':'#fef3c7'};color:${e.st==='Entregue'?'#15803d':e.st==='Devolvido'?'#1d4ed8':'#d97706'};padding:2px 7px;border-radius:12px;font-size:10px;font-weight:600">${e.st}</span>
+        </td>
         <td style="padding:6px 8px;font-size:10px;color:#666;text-align:center">${authLabel}<br><span style="font-size:9px;color:#999">${e.auth?.ts?new Date(e.auth.ts).toLocaleString('pt-BR'):''}</span></td>
       </tr>`;
     });
