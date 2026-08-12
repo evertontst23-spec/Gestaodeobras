@@ -1981,9 +1981,12 @@ function gerarAssinaturasDigitais(f, entregas){
     <div style="border:1.5px solid ${cor}30;border-radius:10px;margin-bottom:12px;overflow:hidden;background:${bgCor}">
       
       <!-- CABEÇALHO DA ENTREGA -->
-      <div style="background:${cor};color:#fff;padding:8px 14px;display:flex;justify-content:space-between;align-items:center">
+      <div style="background:${cor};color:#fff;padding:8px 14px;display:flex;justify-content:space-between;align-items:center;gap:8px">
         <div style="font-size:12px;font-weight:700">ENTREGA #${String(i+1).padStart(2,'0')} — ${ep.nome||'EPI'}</div>
-        <span style="font-size:11px;background:rgba(255,255,255,.2);padding:2px 8px;border-radius:12px">${e.st||'Entregue'}</span>
+        <div style="display:flex;align-items:center;gap:6px">
+          <span style="font-size:11px;background:rgba(255,255,255,.2);padding:2px 8px;border-radius:12px">${e.st||'Entregue'}</span>
+          ${e.st!=='Devolvido' ? `<button onclick="devolverEpi(${e.id},${f.id})" style="background:rgba(255,255,255,.25);border:1px solid rgba(255,255,255,.5);color:#fff;padding:3px 10px;border-radius:6px;font-size:11px;cursor:pointer;font-weight:600;font-family:inherit" title="Registrar devolução deste EPI">↩ Devolver</button>` : '<span style="font-size:11px;opacity:.7">✅ Devolvido</span>'}
+        </div>
       </div>
 
       <div style="padding:12px 14px">
@@ -2100,6 +2103,34 @@ function abrirModoFiscalizacao(){
     </body>
     </html>`);
   janela.document.close();
+}
+
+
+/* ── DEVOLVER EPI DIRETO DA FICHA ── */
+function devolverEpi(entregaId, funcId){
+  const e = db.entregas.find(x=>x.id===entregaId);
+  if(!e){ toast('Entrega não encontrada','w'); return; }
+  
+  const ep = db.epis.find(x=>x.id===e.eid)||{};
+  const f = db.funcionarios.find(x=>x.id===funcId)||{};
+  
+  if(!confirm(`Registrar devolução de "${ep.nome}" por ${f.nome}?\n\nO item voltará ao estoque automaticamente.`)) return;
+  
+  // Marcar como devolvido
+  e.st = 'Devolvido';
+  e.dtDevolucao = dHj();
+  
+  // Devolver ao estoque
+  const epi = db.epis.find(x=>x.id===e.eid);
+  if(epi){ epi.qty += (e.qty||1); }
+  
+  sv();
+  
+  // Atualizar ficha na tela
+  const sel = document.getElementById('fichaSelect');
+  if(sel) renderFicha();
+  
+  toast(`✅ ${ep.nome} devolvido — estoque atualizado!`);
 }
 
 /* ── FICHA INDIVIDUAL DE EPI ── */
