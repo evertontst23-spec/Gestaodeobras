@@ -862,7 +862,10 @@ input:hover:not([readonly]):not(:focus){border-color:var(--bd2)}
       <button class="ni" onclick="nav('dds-lista');fecharNavDrawer()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>DDS</button>
       <button class="ni" onclick="nav('epi-ficha');fecharNavDrawer()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Ficha EPI</button>
       <button class="ni" onclick="nav('epi-est');fecharNavDrawer()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>Estoque EPI</button>
-      <div class="ns">Almoxarifado</div>
+      <div class="ns">Solicitações</div>
+    <button class="ni" onclick="nav('solicitacoes')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12h6M9 16h4"/></svg>Solicitações <span class="nb" id="bdgSol" style="display:none">0</span></button>
+    <div class="ns">Almoxarifado</div>
+      <button class="ni" onclick="nav('solicitacoes');fecharNavDrawer()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/></svg>Solicitações</button>
       <button class="ni" onclick="nav('almo-mov');fecharNavDrawer()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg>Movimentação</button>
       <button class="ni" onclick="nav('almo-est');fecharNavDrawer()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>Estoque</button>
       <div class="ns">Financeiro</div>
@@ -1095,6 +1098,121 @@ input:hover:not([readonly]):not(:focus){border-color:var(--bd2)}
       <div id="ddsFormDoc"></div>
     </div>
 
+
+    <!-- ══ SOLICITAÇÕES ══ -->
+    <div id="page-solicitacoes" class="page">
+      <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center">
+        <div class="sw" style="flex:1;min-width:160px">
+          <svg class="si" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input id="buscaSol" placeholder="Buscar solicitações..." oninput="renderSolicitacoes()">
+        </div>
+        <select id="filSolSt" onchange="renderSolicitacoes()" style="width:150px">
+          <option value="">Todos</option>
+          <option>Pendente</option>
+          <option>Em Análise</option>
+          <option>Aprovada</option>
+          <option>Recusada</option>
+          <option>Entregue</option>
+        </select>
+        <select id="filSolTp" onchange="renderSolicitacoes()" style="width:140px">
+          <option value="">Tipo: Todos</option>
+          <option>EPI</option>
+          <option>Material</option>
+        </select>
+        <button class="btn bp" onclick="abrirNovaSolicitacao()">+ Nova Solicitação</button>
+      </div>
+      <div class="sg" id="solStats"></div>
+      <div class="card tw">
+        <table>
+          <thead><tr><th>Nº</th><th>Data</th><th>Tipo</th><th>Item</th><th>Qtd</th><th>Solicitante</th><th>Justificativa</th><th>Status</th><th>Ações</th></tr></thead>
+          <tbody id="tbSol"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- MODAL NOVA SOLICITAÇÃO -->
+    <div class="ov hidden" id="ovSol">
+      <div class="modal" style="max-width:560px">
+        <div class="mh">
+          <div>
+            <h2 id="solMT">Nova Solicitação</h2>
+            <div style="font-size:11px;color:var(--mu);margin-top:2px">Solicitação de Material ou EPI</div>
+          </div>
+          <button class="mcl" onclick="fM('ovSol')">✕</button>
+        </div>
+        <div class="mb">
+          <div class="fr2">
+            <div class="fg"><label class="fl">Tipo *</label>
+              <select id="sol_tipo" onchange="atualizarItensSol()">
+                <option value="">Selecione...</option>
+                <option>EPI</option>
+                <option>Material</option>
+              </select>
+            </div>
+            <div class="fg"><label class="fl">Item *</label>
+              <select id="sol_item"><option value="">Selecione o tipo primeiro</option></select>
+            </div>
+          </div>
+          <div class="fr2">
+            <div class="fg"><label class="fl">Quantidade *</label>
+              <input type="number" id="sol_qty" min="1" value="1">
+            </div>
+            <div class="fg"><label class="fl">Unidade</label>
+              <input id="sol_un" placeholder="Ex: un, m², sc" value="un">
+            </div>
+          </div>
+          <div class="fg"><label class="fl">Solicitante *</label>
+            <select id="sol_func">
+              <option value="">Selecione o funcionário</option>
+            </select>
+          </div>
+          <div class="fg"><label class="fl">Urgência</label>
+            <select id="sol_urg">
+              <option>Normal</option>
+              <option>Urgente</option>
+              <option>Crítico</option>
+            </select>
+          </div>
+          <div class="fg"><label class="fl">Justificativa / Observação</label>
+            <textarea id="sol_just" placeholder="Descreva o motivo da solicitação..." style="min-height:80px"></textarea>
+          </div>
+        </div>
+        <div class="mf">
+          <button class="btn bo" onclick="fM('ovSol')">Cancelar</button>
+          <button class="btn bp" onclick="salvarSolicitacao()">💾 Enviar Solicitação</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL RESPONDER SOLICITAÇÃO -->
+    <div class="ov hidden" id="ovSolResp">
+      <div class="modal" style="max-width:500px">
+        <div class="mh">
+          <h2>📋 Responder Solicitação</h2>
+          <button class="mcl" onclick="fM('ovSolResp')">✕</button>
+        </div>
+        <div class="mb">
+          <div id="solRespInfo" style="background:var(--bg);border-radius:var(--r);padding:12px;margin-bottom:14px;font-size:13px"></div>
+          <div class="fg"><label class="fl">Decisão *</label>
+            <select id="sol_decisao">
+              <option value="">Selecione...</option>
+              <option value="Em Análise">🔍 Em Análise</option>
+              <option value="Aprovada">✅ Aprovar</option>
+              <option value="Recusada">❌ Recusar</option>
+              <option value="Entregue">📦 Marcar como Entregue</option>
+            </select>
+          </div>
+          <div class="fg"><label class="fl">Observação da Resposta</label>
+            <textarea id="sol_resp_obs" placeholder="Motivo da decisão, data prevista de entrega..." style="min-height:70px"></textarea>
+          </div>
+        </div>
+        <div class="mf">
+          <button class="btn bo" onclick="fM('ovSolResp')">Cancelar</button>
+          <button class="btn bp" onclick="confirmarRespostaSol()">✅ Confirmar</button>
+        </div>
+      </div>
+    </div>
+
     <!-- DOSSIE LISTA -->
     <div id="page-dossie-lista" class="page">
       <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;align-items:center">
@@ -1155,6 +1273,7 @@ input:hover:not([readonly]):not(:focus){border-color:var(--bd2)}
         <button class="tab" onclick="abaM('dados')" id="tabM-dados" style="padding:10px 16px;font-size:13px">🗄️ Banco de Dados</button>
         <button class="tab" onclick="abaM('cfg')" id="tabM-cfg" style="padding:10px 16px;font-size:13px">⚙️ Config.</button>
         <button class="tab" onclick="abaM('sistema')" id="tabM-sistema" style="padding:10px 16px;font-size:13px">🔧 Sistema</button>
+        <button class="tab" onclick="abaM('seguranca')" id="tabM-seguranca" style="padding:10px 16px;font-size:13px">🔐 Segurança</button>
       </div>
 
       <!-- ABA OBRAS -->
@@ -1217,6 +1336,39 @@ input:hover:not([readonly]):not(:focus){border-color:var(--bd2)}
               <button class="btn bd2" onclick="resetarTudo()" style="font-size:12px;background:#7f1d1d">💣 Resetar TUDO</button>
             </div>
           </div>
+        </div>
+      </div>
+
+      <!-- ABA SEGURANÇA -->
+      <div id="abaM-seguranca" class="hidden" style="padding:18px">
+        <h3 style="margin-bottom:14px">🔐 Segurança e Log de Acessos</h3>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px">
+          <div style="background:var(--okb);border:1px solid var(--okd);border-radius:var(--r);padding:12px;text-align:center">
+            <div style="font-size:20px;margin-bottom:4px">🔒</div>
+            <div style="font-size:11px;font-weight:700;color:var(--ok)">Senhas SHA-256</div>
+            <div style="font-size:10px;color:var(--mu)">Criptografadas</div>
+          </div>
+          <div style="background:var(--okb);border:1px solid var(--okd);border-radius:var(--r);padding:12px;text-align:center">
+            <div style="font-size:20px;margin-bottom:4px">⏱️</div>
+            <div style="font-size:11px;font-weight:700;color:var(--ok)">Sessão 8h</div>
+            <div style="font-size:10px;color:var(--mu)">Timeout automático</div>
+          </div>
+          <div style="background:var(--okb);border:1px solid var(--okd);border-radius:var(--r);padding:12px;text-align:center">
+            <div style="font-size:20px;margin-bottom:4px">🛡️</div>
+            <div style="font-size:11px;font-weight:700;color:var(--ok)">5 tentativas</div>
+            <div style="font-size:10px;color:var(--mu)">Bloqueio 30 min</div>
+          </div>
+        </div>
+        <h3 style="margin-bottom:10px">Últimos Acessos</h3>
+        <div style="max-height:300px;overflow-y:auto">
+          <table style="width:100%;border-collapse:collapse;font-size:12px">
+            <thead><tr style="background:var(--bg)">
+              <th style="padding:8px;text-align:left;border-bottom:1px solid var(--bd)">Usuário</th>
+              <th style="padding:8px;text-align:left;border-bottom:1px solid var(--bd)">Perfil</th>
+              <th style="padding:8px;text-align:left;border-bottom:1px solid var(--bd)">Data/Hora</th>
+            </tr></thead>
+            <tbody id="tbLogAcessos"></tbody>
+          </table>
         </div>
       </div>
 
@@ -2302,7 +2454,7 @@ function imprimirFicha(){
 }
 
 /* init */
-renderDash();popEpiSelects();updBdgEpi();updBdgAlmo();
+renderDash();popEpiSelects();updBdgEpi();updBdgAlmo();updBdgSol();
 
 // Pré-carregar modelos em background após 3 segundos
 setTimeout(async()=>{
@@ -4429,7 +4581,7 @@ function trocarObra(id){
   carregarObra(id);
   sincUsuarios();
   atualizarSeletorSidebar(id);
-  renderDash();popEpiSelects();updBdgEpi();updBdgAlmo();
+  renderDash();popEpiSelects();updBdgEpi();updBdgAlmo();updBdgSol();
   nav('dashboard');
   toast('✅ '+OBRAS[id].nome);
 }
@@ -4796,6 +4948,199 @@ async function salvarFichaPDF(){
 }
 
 
+
+/* ══════════════════════════════════════
+   SOLICITAÇÕES DE MATERIAIS E EPIs
+   Acesso: almoxarife, seguranca, diretor, master
+══════════════════════════════════════ */
+if(!db.solicitacoes){ db.solicitacoes=[]; sv(); }
+if(!db.nids.sol) db.nids.sol=1;
+
+let solAtual = null;
+
+/* ── PERMISSÃO ── */
+function podResponderSol(){
+  return ['master','diretor','almoxarife','seguranca'].includes(perfilAtual);
+}
+
+/* ── BADGE ── */
+function updBdgSol(){
+  const pend = (db.solicitacoes||[]).filter(s=>s.status==='Pendente').length;
+  const el = document.getElementById('bdgSol');
+  if(el){ el.style.display = pend>0?'inline-flex':'none'; el.textContent=pend; }
+}
+
+/* ── LISTA ── */
+function renderSolicitacoes(){
+  updBdgSol();
+  const busca = (document.getElementById('buscaSol').value||'').toLowerCase();
+  const filSt = document.getElementById('filSolSt').value;
+  const filTp = document.getElementById('filSolTp').value;
+
+  const lista = [...(db.solicitacoes||[])].reverse().filter(s=>
+    (!filSt || s.status===filSt) &&
+    (!filTp || s.tipo===filTp) &&
+    (!busca || (s.item+s.solicitante+s.just).toLowerCase().includes(busca))
+  );
+
+  const total = db.solicitacoes.length;
+  const pend  = db.solicitacoes.filter(s=>s.status==='Pendente').length;
+  const aprov = db.solicitacoes.filter(s=>s.status==='Aprovada'||s.status==='Entregue').length;
+  const recus = db.solicitacoes.filter(s=>s.status==='Recusada').length;
+
+  document.getElementById('solStats').innerHTML=`
+    <div class="sc ca"><div class="lb">Total</div><div class="vl">${total}</div></div>
+    <div class="sc cw"><div class="lb">Pendentes</div><div class="vl">${pend}</div></div>
+    <div class="sc cg"><div class="lb">Aprovadas/Entregues</div><div class="vl">${aprov}</div></div>
+    <div class="sc cr"><div class="lb">Recusadas</div><div class="vl">${recus}</div></div>`;
+
+  const tb = document.getElementById('tbSol');
+  if(!lista.length){
+    tb.innerHTML=`<tr><td colspan="9" style="text-align:center;padding:28px;color:var(--mu)">Nenhuma solicitação encontrada</td></tr>`;
+    return;
+  }
+
+  const cores = {
+    'Pendente':  {bg:'#fef3c7',tx:'#d97706'},
+    'Em Análise':{bg:'#dbeafe',tx:'#1d4ed8'},
+    'Aprovada':  {bg:'#dcfce7',tx:'#15803d'},
+    'Recusada':  {bg:'#fee2e2',tx:'#dc2626'},
+    'Entregue':  {bg:'#f3e8ff',tx:'#7c3aed'},
+  };
+  const urgCor = {'Normal':'#6b7280','Urgente':'#d97706','Crítico':'#dc2626'};
+
+  tb.innerHTML = lista.map(s=>{
+    const c = cores[s.status]||{bg:'#f1f5f9',tx:'#475569'};
+    const podResp = podResponderSol();
+    return `<tr>
+      <td style="font-weight:700;color:var(--ac)">#${s.id}</td>
+      <td style="font-size:12px">${s.dt}<br><span style="font-size:10px;color:${urgCor[s.urg]||'#6b7280'};font-weight:600">${s.urg||'Normal'}</span></td>
+      <td><span class="badge ${s.tipo==='EPI'?'bbl':'bgy'}">${s.tipo}</span></td>
+      <td style="font-weight:600;font-size:13px">${s.item}</td>
+      <td style="text-align:center">${s.qty} ${s.un||'un'}</td>
+      <td style="font-size:12px">${s.solicitante}</td>
+      <td style="font-size:12px;color:var(--mu);max-width:180px">${s.just||'—'}</td>
+      <td><span style="background:${c.bg};color:${c.tx};padding:3px 9px;border-radius:12px;font-size:11px;font-weight:600">${s.status}</span>
+        ${s.respObs?`<div style="font-size:10px;color:var(--mu);margin-top:3px">${s.respObs}</div>`:''}
+      </td>
+      <td><div style="display:flex;gap:4px;flex-wrap:wrap">
+        ${podResp&&s.status!=='Entregue'?`<button class="btn bp bsm" onclick="responderSol(${s.id})">📋 Responder</button>`:''}
+        <button class="btn bd2 bsm" onclick="excluirSol(${s.id})">✕</button>
+      </div></td>
+    </tr>`;
+  }).join('');
+}
+
+/* ── NOVA SOLICITAÇÃO ── */
+function abrirNovaSolicitacao(){
+  solAtual = null;
+  document.getElementById('sol_tipo').value='';
+  document.getElementById('sol_item').innerHTML='<option value="">Selecione o tipo primeiro</option>';
+  document.getElementById('sol_qty').value=1;
+  document.getElementById('sol_un').value='un';
+  document.getElementById('sol_just').value='';
+  document.getElementById('sol_urg').value='Normal';
+  // Preencher solicitante com funcionários
+  const sel = document.getElementById('sol_func');
+  sel.innerHTML = '<option value="">Selecione o funcionário</option>' +
+    db.funcionarios.map(f=>`<option value="${f.nome}">${f.nome} — ${f.funcao||''}</option>`).join('');
+  document.getElementById('ovSol').classList.remove('hidden');
+}
+
+function atualizarItensSol(){
+  const tipo = document.getElementById('sol_tipo').value;
+  const sel = document.getElementById('sol_item');
+  if(tipo==='EPI'){
+    sel.innerHTML = '<option value="">Selecione o EPI</option>' +
+      db.epis.map(e=>`<option value="${e.nome}">${e.nome} (CA ${e.ca||'—'})</option>`).join('');
+    document.getElementById('sol_un').value='un';
+  } else if(tipo==='Material'){
+    sel.innerHTML = '<option value="">Selecione o Material</option>' +
+      db.materiais.map(m=>`<option value="${m.nome}">${m.nome}</option>`).join('');
+  } else {
+    sel.innerHTML = '<option value="">Selecione o tipo primeiro</option>';
+  }
+}
+
+function salvarSolicitacao(){
+  const tipo = document.getElementById('sol_tipo').value;
+  const item = document.getElementById('sol_item').value;
+  const qty  = parseInt(document.getElementById('sol_qty').value)||0;
+  const sol  = document.getElementById('sol_func').value;
+  const just = document.getElementById('sol_just').value;
+  const urg  = document.getElementById('sol_urg').value;
+  const un   = document.getElementById('sol_un').value;
+
+  if(!tipo||!item||qty<1||!sol){ toast('Preencha todos os campos obrigatórios','w'); return; }
+
+  const maxId = db.solicitacoes.length>0 ? Math.max(...db.solicitacoes.map(x=>x.id||0)) : 0;
+  const novoId = Math.max(maxId, db.nids.sol) + 1;
+  db.nids.sol = novoId + 1;
+
+  db.solicitacoes.push({
+    id: novoId,
+    dt: dHj(),
+    ts: new Date().toISOString(),
+    tipo, item, qty, un, urg,
+    solicitante: sol,
+    just,
+    status: 'Pendente',
+    respObs: '',
+    respPor: '',
+    respTs: ''
+  });
+
+  sv();
+  fM('ovSol');
+  renderSolicitacoes();
+  updBdgSol();
+  toast('✅ Solicitação enviada!');
+}
+
+/* ── RESPONDER SOLICITAÇÃO ── */
+function responderSol(id){
+  if(!podResponderSol()){ toast('Sem permissão para responder solicitações','w'); return; }
+  solAtual = db.solicitacoes.find(s=>s.id===id);
+  if(!solAtual) return;
+
+  document.getElementById('solRespInfo').innerHTML=`
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+      <div><div style="font-size:10px;color:var(--mu);font-weight:700;text-transform:uppercase">Solicitante</div><div style="font-weight:600">${solAtual.solicitante}</div></div>
+      <div><div style="font-size:10px;color:var(--mu);font-weight:700;text-transform:uppercase">Tipo</div><div style="font-weight:600">${solAtual.tipo}</div></div>
+      <div><div style="font-size:10px;color:var(--mu);font-weight:700;text-transform:uppercase">Item</div><div style="font-weight:600">${solAtual.item}</div></div>
+      <div><div style="font-size:10px;color:var(--mu);font-weight:700;text-transform:uppercase">Quantidade</div><div style="font-weight:600">${solAtual.qty} ${solAtual.un||'un'}</div></div>
+      <div style="grid-column:1/-1"><div style="font-size:10px;color:var(--mu);font-weight:700;text-transform:uppercase">Justificativa</div><div>${solAtual.just||'—'}</div></div>
+    </div>`;
+
+  document.getElementById('sol_decisao').value='';
+  document.getElementById('sol_resp_obs').value='';
+  document.getElementById('ovSolResp').classList.remove('hidden');
+}
+
+function confirmarRespostaSol(){
+  if(!solAtual) return;
+  const decisao = document.getElementById('sol_decisao').value;
+  const obs = document.getElementById('sol_resp_obs').value;
+  if(!decisao){ toast('Selecione uma decisão','w'); return; }
+
+  solAtual.status = decisao;
+  solAtual.respObs = obs;
+  solAtual.respPor = perfilAtual;
+  solAtual.respTs = new Date().toISOString();
+
+  sv();
+  fM('ovSolResp');
+  renderSolicitacoes();
+  updBdgSol();
+  toast(`✅ Solicitação ${decisao.toLowerCase()}!`);
+}
+
+function excluirSol(id){
+  if(!confirm('Excluir esta solicitação?')) return;
+  db.solicitacoes = db.solicitacoes.filter(s=>s.id!==id);
+  sv(); renderSolicitacoes(); updBdgSol(); toast('Excluída');
+}
+
 /* ══════════════════════════════════════
    CORREÇÃO DE IDs DUPLICADOS
    Roda automaticamente ao carregar
@@ -4849,18 +5194,135 @@ function corrigirIdsDuplicados(){
   }
 }
 
+
+/* ══════════════════════════════════════
+   SEGURANÇA — FASE 1
+   - Senhas em SHA-256
+   - Limite de tentativas
+   - Timeout de sessão (8h)
+   - Log de acessos
+══════════════════════════════════════ */
+
+const MAX_TENTATIVAS = 5;
+const BLOQUEIO_MS = 30 * 60 * 1000; // 30 minutos
+const SESSAO_MAX_MS = 8 * 60 * 60 * 1000; // 8 horas
+
+/* ── TENTATIVAS DE LOGIN ── */
+function verificarTentativas(user){
+  const dados = JSON.parse(localStorage.getItem('login_sec')||'{}');
+  const info = dados[user];
+  if(!info) return true;
+  if(info.bloqueadoAte && Date.now() < info.bloqueadoAte) return false;
+  return true;
+}
+
+function registrarTentativa(user){
+  const dados = JSON.parse(localStorage.getItem('login_sec')||'{}');
+  if(!dados[user]) dados[user] = {tentativas:0};
+  dados[user].tentativas++;
+  dados[user].ultima = Date.now();
+  if(dados[user].tentativas >= MAX_TENTATIVAS){
+    dados[user].bloqueadoAte = Date.now() + BLOQUEIO_MS;
+    dados[user].tentativas = 0;
+  }
+  localStorage.setItem('login_sec', JSON.stringify(dados));
+}
+
+function resetarTentativas(user){
+  const dados = JSON.parse(localStorage.getItem('login_sec')||'{}');
+  delete dados[user];
+  localStorage.setItem('login_sec', JSON.stringify(dados));
+}
+
+function iniciarContagem(user){
+  const dados = JSON.parse(localStorage.getItem('login_sec')||'{}');
+  const restante = Math.ceil((dados[user]?.bloqueadoAte - Date.now()) / 1000);
+  let seg = restante;
+  const el = document.getElementById('countdown');
+  const timer = setInterval(()=>{
+    seg--;
+    if(el) el.textContent = seg;
+    if(seg <= 0){
+      clearInterval(timer);
+      const erro = document.getElementById('loginErro');
+      if(erro) erro.style.display = 'none';
+    }
+  }, 1000);
+}
+
+/* ── SESSÃO ── */
+function iniciarSessao(u){
+  const sessao = {
+    user: u.perfil,
+    inicio: Date.now(),
+    expira: Date.now() + SESSAO_MAX_MS
+  };
+  sessionStorage.setItem('kairon_sessao', JSON.stringify(sessao));
+}
+
+function verificarSessao(){
+  const sessao = JSON.parse(sessionStorage.getItem('kairon_sessao')||'null');
+  if(!sessao) return false;
+  if(Date.now() > sessao.expira){
+    sessionStorage.removeItem('kairon_sessao');
+    return false;
+  }
+  return true;
+}
+
+// Verificar sessão a cada 5 minutos
+setInterval(()=>{
+  if(perfilAtual && !verificarSessao()){
+    toast('⏰ Sessão expirada — faça login novamente');
+    setTimeout(()=>fazerLogout(), 2000);
+  }
+}, 5 * 60 * 1000);
+
+/* ── LOG DE ACESSOS ── */
+function registrarAcesso(user, perfil){
+  if(!db.logAcessos) db.logAcessos = [];
+  db.logAcessos.push({
+    user, perfil,
+    dt: new Date().toLocaleString('pt-BR'),
+    ts: Date.now()
+  });
+  // Manter só os últimos 100 logs
+  if(db.logAcessos.length > 100) db.logAcessos = db.logAcessos.slice(-100);
+  sv();
+}
+
+/* ── SINCUSUARIOS ATUALIZADO ── */
+function sincUsuarios(){
+  // Só adiciona usuários extras criados pelo master
+  if(db.usuarios && db.usuarios.length > 0){
+    db.usuarios.forEach(u=>{
+      const padrao = ['master','diretor','seguranca','almoxarife','financeiro','funcionario'];
+      if(!padrao.includes(u.login)){
+        // Usuário criado pelo master — adicionar com hash
+        USUARIOS[u.login] = {
+          hash: u.hash || u.senha, // compatibilidade
+          perfil: u.perfil,
+          nome: u.nome,
+          label: u.label
+        };
+      }
+    });
+  }
+}
+
 /* ══════════════════════════════════════
    SISTEMA DE LOGIN E PERFIS DE ACESSO
 ══════════════════════════════════════ */
 
 /* Usuários e senhas — altere as senhas após o primeiro acesso */
+/* Senhas armazenadas como SHA-256 — nunca em texto puro */
 const USUARIOS = {
-  'master':       { senha:'Everton@Kairon#2026', perfil:'master', nome:'Master', label:'🛠️ Master Dev' },
-  'diretor':      { senha:'Mardifi@2026',   perfil:'diretor',      nome:'Diretoria',      label:'👔 Diretoria' },
-  'seguranca':    { senha:'VilaBrasil@2026', perfil:'seguranca',    nome:'Seg. Trabalho',  label:'⚡ Seg. Trabalho' },
-  'almoxarife':   { senha:'Estoque@2026',   perfil:'almoxarife',   nome:'Almoxarifado',   label:'📦 Almoxarifado' },
-  'financeiro':   { senha:'Financeiro@2026',perfil:'financeiro',   nome:'Financeiro',     label:'💰 Financeiro' },
-  'funcionario':  { senha:'Obra@2026',      perfil:'funcionario',  nome:'Funcionário',    label:'👷 Funcionário' },
+  'master':       { hash:'7cd8b82ac4002cbd4d22d6427e4ad82682227b576dc8b5759df5510e6fcd97a9', perfil:'master',      nome:'Master',        label:'🛠️ Master Dev' },
+  'diretor':      { hash:'517ae13389f5613e80627a64e3cb8768ea47cc6498cddf42aa2bb368f16bcb38', perfil:'diretor',      nome:'Diretoria',     label:'👔 Diretoria' },
+  'seguranca':    { hash:'70cc9357e42c868b2d1e5bcf8b59eb9e7e2aea62f0c95f27c492951333fc5ff4', perfil:'seguranca',    nome:'Seg. Trabalho', label:'⚡ Seg. Trabalho' },
+  'almoxarife':   { hash:'7d6c47ffd0bae57dd954f729b6014d66dbc98422cfb7a1d39f294c753e82c1b8', perfil:'almoxarife',   nome:'Almoxarifado',  label:'📦 Almoxarifado' },
+  'financeiro':   { hash:'eff59fff83e3f2fe8ac972d6772252369072e14d06d62d094dee0ae847f0efe3', perfil:'financeiro',   nome:'Financeiro',    label:'💰 Financeiro' },
+  'funcionario':  { hash:'132de11a871985abcd59f068a261f5fd8e49b31ef6451b3b0cb5e8d5e32e4146', perfil:'funcionario',  nome:'Funcionário',   label:'👷 Funcionário' },
 };
 
 /* Menus permitidos por perfil */
@@ -4876,72 +5338,34 @@ const MENUS_PERFIL = {
 let perfilAtual = null;
 let ptStrFunc = null, ptLpFunc = null;
 
-function fazerLogin(){
+async function fazerLogin(){
   const user = document.getElementById('loginUser').value.trim().toLowerCase();
   const pass = document.getElementById('loginPass').value;
   const erro = document.getElementById('loginErro');
   erro.style.display = 'none';
 
+  // Verificar tentativas de login
+  if(!verificarTentativas(user)){
+    erro.innerHTML = '⛔ Muitas tentativas. Aguarde <span id="countdown">30</span> segundos.';
+    erro.style.display = 'block';
+    iniciarContagem(user);
+    return;
+  }
+
+  // Gerar hash da senha digitada
+  const hashDigitado = await gHash(pass);
+  
   const u = USUARIOS[user];
-  if(!u || u.senha !== pass){
+  if(!u || u.hash !== hashDigitado){
+    registrarTentativa(user);
     erro.style.display = 'block';
     document.getElementById('loginPass').value = '';
     return;
   }
 
-  perfilAtual = u.perfil;
-  
-  // Carregar obra padrão (Vila Brasil) ao logar
-  carregarObra('vila_brasil');
-  sincUsuarios();
-  // Atualizar visual do seletor na sidebar após render
-  setTimeout(()=>atualizarSeletorSidebar('vila_brasil'), 200);
-
-  document.getElementById('loginScreen').style.display = 'none';
-  document.getElementById('loginErro').style.display = 'none';
-  
-  // MIGRAÇÃO: se tem dados na chave antiga 'kairon_v4', mover para vila_brasil
-  const dadosAntigos = localStorage.getItem('kairon_v4');
-  const dadosVilaBrasil = localStorage.getItem('kairon_v4_vila_brasil');
-  if(dadosAntigos && !dadosVilaBrasil){
-    localStorage.setItem('kairon_v4_vila_brasil', dadosAntigos);
-    console.log('[Migração] Dados movidos de kairon_v4 para kairon_v4_vila_brasil');
-    // Recarregar obra com dados migrados
-    carregarObra('vila_brasil');
-    sincUsuarios();
-    toast('✅ Dados migrados para Vila Brasil');
-  }
-
-  if(perfilAtual === 'funcionario'){
-    /* Tela simplificada só de ponto */
-    const tf = document.getElementById('telaFuncionario');
-    tf.style.display = 'flex';
-    tickFunc();
-    return;
-  }
-
-  /* Acesso ao sistema completo */
-  document.getElementById('appMain').style.display = 'flex';
-  document.getElementById('perfilBadge').textContent = u.label;
-  document.getElementById('btnPainelMaster').style.display = perfilAtual === 'master' ? 'inline-flex' : 'none';
-  // Atualizar sidebar obras e status nuvem
-  setTimeout(()=>{
-    atualizarSeletorSidebar('vila_brasil');
-    mostrarStatusSync(false); // começa como local
-  }, 200);
-
-  /* Aplicar restrições de menu */
-  aplicarPerfil(perfilAtual);
-
-  /* Navegar para página inicial do perfil */
-  const paginaInicial = {
-    master:    'dashboard',
-    diretor:   'dashboard',
-    seguranca: 'dashboard',
-    almoxarife:'almo-mov',
-    financeiro:'fin-fluxo',
-  };
-  nav(paginaInicial[perfilAtual] || 'dashboard');
+  // Login bem-sucedido — resetar tentativas
+  resetarTentativas(user);
+  iniciarSessao(u);
 }
 
 function aplicarPerfil(perfil){
@@ -5256,20 +5680,7 @@ if(!db.usuarios){
 }
 
 /* Sobrescrever USUARIOS com os do banco */
-function sincUsuarios(){
-  // Só adiciona usuários extras criados pelo master, não sobrescreve os padrão
-  if(db.usuarios && db.usuarios.length > 0){
-    db.usuarios.forEach(u=>{
-      // Só adiciona se não existir nos padrão hardcoded, ou se for usuário criado pelo master
-      if(!['master','diretor','seguranca','almoxarife','financeiro','funcionario'].includes(u.login)){
-        USUARIOS[u.login]={senha:u.senha,perfil:u.perfil,nome:u.nome,label:u.label};
-      } else {
-        // Para usuários padrão, respeita a senha do db se foi alterada pelo painel master
-        if(USUARIOS[u.login]) USUARIOS[u.login].senha = u.senha;
-      }
-    });
-  }
-}
+/* sincUsuarios — redefinida no bloco de segurança */
 sincUsuarios();
 
 function abrirPainelMaster(){
@@ -5280,7 +5691,14 @@ function abrirPainelMaster(){
 
 function abaM(id){
   if(id==='obras'){const c=document.getElementById('paineObrasCont');if(c)c.innerHTML=verTodasObras();}
-  ['obras','usuarios','dados','cfg','sistema'].forEach(a=>{
+  if(id==='seguranca'){
+    const tb=document.getElementById('tbLogAcessos');
+    if(tb){
+      const logs=[...(db.logAcessos||[])].reverse().slice(0,50);
+      tb.innerHTML=logs.length?logs.map(l=>`<tr><td style="padding:7px 8px">${l.user}</td><td style="padding:7px 8px"><span class="badge bbl">${l.perfil}</span></td><td style="padding:7px 8px;color:var(--mu)">${l.dt}</td></tr>`).join(''):'<tr><td colspan="3" style="padding:20px;text-align:center;color:var(--mu)">Nenhum acesso registrado</td></tr>';
+    }
+  }
+  ['obras','usuarios','dados','cfg','sistema','seguranca'].forEach(a=>{
     const el=document.getElementById('abaM-'+a);
     const tb=document.getElementById('tabM-'+a);
     if(el) el.classList.toggle('hidden', a!==id);
@@ -5288,6 +5706,13 @@ function abaM(id){
   });
   if(id==='dados') atualizarDbStats();
   if(id==='obras'){const c=document.getElementById('paineObrasCont');if(c)c.innerHTML=verTodasObras();}
+  if(id==='seguranca'){
+    const tb=document.getElementById('tbLogAcessos');
+    if(tb){
+      const logs=[...(db.logAcessos||[])].reverse().slice(0,50);
+      tb.innerHTML=logs.length?logs.map(l=>`<tr><td style="padding:7px 8px">${l.user}</td><td style="padding:7px 8px"><span class="badge bbl">${l.perfil}</span></td><td style="padding:7px 8px;color:var(--mu)">${l.dt}</td></tr>`).join(''):'<tr><td colspan="3" style="padding:20px;text-align:center;color:var(--mu)">Nenhum acesso registrado</td></tr>';
+    }
+  }
   if(id==='sistema') verificarSistema();
 }
 
@@ -5316,7 +5741,7 @@ function adicionarUsuario(){
   document.getElementById('nu_perfil').selectedIndex=0;
 }
 
-function salvarNovoUser(){
+async function salvarNovoUser(){
   const login=document.getElementById('nu_login').value.trim().toLowerCase().replace(/\s/g,'');
   const senha=document.getElementById('nu_senha').value.trim();
   const nome=document.getElementById('nu_nome').value.trim();
@@ -5325,24 +5750,27 @@ function salvarNovoUser(){
   if(senha.length<6){toast('Senha mínimo 6 caracteres','w');return}
   if(db.usuarios.find(u=>u.login===login)){toast('Login já existe','w');return}
   const labels={diretor:'👔',seguranca:'⚡',almoxarife:'📦',financeiro:'💰',funcionario:'👷'};
-  const u={login,senha,perfil,nome,label:`${labels[perfil]||'👤'} ${nome}`};
+  const hash = await gHash(senha);
+  const u={login,hash,senha:'',perfil,nome,label:`${labels[perfil]||'👤'} ${nome}`};
   db.usuarios.push(u);
-  USUARIOS[login]=u;
+  USUARIOS[login]={hash,perfil,nome,label:u.label};
   sv();
   renderUsuarios();
   document.getElementById('formNovoUser').classList.add('hidden');
-  toast('Usuário criado: '+login);
+  toast('✅ Usuário criado: '+login);
 }
 
-function editarSenha(i){
+async function editarSenha(i){
   const u=db.usuarios[i];
-  const nova=prompt(`Nova senha para "${u.login}" (atual oculta):`);
+  const nova=prompt(`Nova senha para "${u.login}":\n(mínimo 6 caracteres)`);
   if(!nova)return;
   if(nova.length<6){toast('Mínimo 6 caracteres','w');return}
-  db.usuarios[i].senha=nova;
-  USUARIOS[u.login].senha=nova;
+  const novoHash = await gHash(nova);
+  db.usuarios[i].hash = novoHash;
+  db.usuarios[i].senha = ''; // limpar senha em texto
+  if(USUARIOS[u.login]) USUARIOS[u.login].hash = novoHash;
   sv();
-  toast('Senha atualizada!');
+  toast('✅ Senha atualizada com segurança!');
 }
 
 function removerUser(i){
