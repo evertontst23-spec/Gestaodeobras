@@ -5166,7 +5166,13 @@ async function fazerLogin(){
   resetarTentativas(user);
   iniciarSessao(u);
 
-  // Carregar obra padrão
+  // Migrar dados antigos se necessário
+  const _ant = localStorage.getItem('kairon_v4');
+  if(_ant && !localStorage.getItem('kairon_vila_brasil')){
+    localStorage.setItem('kairon_vila_brasil', _ant);
+  }
+
+  // Carregar obra e dados
   carregarObra('vila_brasil');
   sincUsuarios();
 
@@ -5174,18 +5180,24 @@ async function fazerLogin(){
   document.getElementById('loginScreen').style.display = 'none';
   document.getElementById('loginErro').style.display = 'none';
 
-  // Aplicar perfil e mostrar sistema
-  aplicarPerfil(u.perfil || u);
-  setTimeout(()=>atualizarSeletorSidebar('vila_brasil'), 200);
+  // Definir perfil ativo
+  perfilAtual = u.perfil;
+  const pb = document.getElementById('perfilBadge');
+  if(pb) pb.textContent = u.label || u.perfil;
 
-  // Migração de dados antigos
-  const dadosAntigos = localStorage.getItem('kairon_v4');
-  const dadosVilaBrasil = localStorage.getItem('kairon_vila_brasil');
-  if(dadosAntigos && !dadosVilaBrasil){
-    localStorage.setItem('kairon_vila_brasil', dadosAntigos);
-    carregarObra('vila_brasil');
-    sincUsuarios();
-  }
+  // Aplicar permissões de menu
+  aplicarPerfil(u.perfil);
+
+  // Renderizar dashboard
+  renderDash();
+  nav('dashboard');
+  popEpiSelects();
+  updBdgEpi();
+  updBdgAlmo();
+  if(typeof updBdgSol === 'function') updBdgSol();
+
+  // Atualizar seletor de obra
+  setTimeout(()=>atualizarSeletorSidebar('vila_brasil'), 200);
 
   // Log de acesso
   registrarAcesso(u.nome||u.perfil, u.perfil);
