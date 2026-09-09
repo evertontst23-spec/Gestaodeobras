@@ -17,8 +17,7 @@
 <title>CAD Engenharia e SST — Urbanização Vila Brasil · Mardifi</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
 <script>
 // Desregistrar Service Workers antigos que causam tela branca
 if('serviceWorker' in navigator){
@@ -5247,9 +5246,7 @@ if('serviceWorker' in navigator){
     regs.forEach(r=>r.unregister());
   });
   window.addEventListener('load',()=>{
-    navigator.serviceWorker.register('sw.js')
-      .then(r=>console.log('SW registrado:',r.scope))
-      .catch(e=>console.log('SW erro:',e));
+    // SW desativado — causa conflito de cache
   });
 }
 
