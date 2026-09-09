@@ -19,6 +19,21 @@
 <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+// Desregistrar Service Workers antigos que causam tela branca
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.getRegistrations().then(regs=>{
+    regs.forEach(r=>r.unregister());
+    if(regs.length > 0) console.log('[SW] Service workers removidos:', regs.length);
+  });
+  // Limpar cache antigo
+  if('caches' in window){
+    caches.keys().then(names=>{
+      names.forEach(n=>caches.delete(n));
+    });
+  }
+}
+</script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap');
 
@@ -4194,16 +4209,9 @@ function carregarObra(id){
   
   atualizarIdentidadeObra(ob);
 
-  // 2. Se local VAZIO, buscar do Supabase (sync para novo dispositivo)
-  const temDadosLocais = db.funcionarios.length > 0;
-  if(!temDadosLocais){
-    mostrarStatusSync(false);
-    buscarDoSupabase(id); // só busca se local vazio
-  } else {
-    mostrarStatusSync(true);
-    // Enviar dados locais para Supabase em background (silencioso)
-    setTimeout(()=>sincronizarParaSupa(id), 2000);
-  }
+  // Supabase em background — não bloqueia
+  mostrarStatusSync(false);
+  setTimeout(()=>buscarDoSupabase(id), 3000);
 }
 
 function criarDbVazio(ob){
@@ -4413,96 +4421,18 @@ function hexToRgb(hex){
 
 /* Buscar dados do Supabase (só quando local vazio) */
 async function buscarDoSupabase(obraId){
-  try{
-    mostrarLoadingSync();
-    const { data: funcs, error } = await supa.from('funcionarios')
-      .select('*').eq('obra_id', obraId);
-    
-    if(error || !funcs || funcs.length === 0){
-      esconderLoadingSync();
-      mostrarStatusSync(false);
-      return;
-    }
-
-    // Carregar todos os dados
-    const [epis, mats, ents, pontos, rdos, bms, ddsList] = await Promise.all([
-      supa.from('epis').select('*').eq('obra_id',obraId),
-      supa.from('materiais').select('*').eq('obra_id',obraId),
-      supa.from('entregas_epi').select('*').eq('obra_id',obraId),
-      supa.from('registros_ponto').select('*').eq('obra_id',obraId),
-      supa.from('rdos').select('*').eq('obra_id',obraId),
-      supa.from('bms').select('*').eq('obra_id',obraId),
-      supa.from('dds').select('*').eq('obra_id',obraId),
-    ]);
-
-    // Mapear para formato local
-    db.funcionarios = funcs.map(f=>({
-      id:f.id, nome:f.nome, mat:f.matricula||'', funcao:f.funcao||'',
-      setor:f.setor||'', cpf:f.cpf||'',
-      face: f.face_descriptor ? JSON.parse(f.face_descriptor) : null
-    }));
-
-    if(epis.data?.length) db.epis = epis.data.map(e=>({
-      id:e.id, nome:e.nome, ca:e.ca||'', cat:e.categoria||'',
-      val:e.validade||'', qty:e.qty||0, min:e.min_qty||5
-    }));
-
-    if(mats.data?.length) db.materiais = mats.data.map(m=>({
-      id:m.id, nome:m.nome, cod:m.codigo||'', cat:m.categoria||'',
-      un:m.unidade||'un', qty:m.qty||0, min:m.min_qty||0,
-      vu:m.valor_unit||0, loc:m.localizacao||''
-    }));
-
-    if(ents.data?.length) db.entregas = ents.data.map(e=>({
-      id:e.id, fid:e.func_id, eid:e.epi_id, qty:e.qty||1,
-      dt:e.data, mot:e.motivo||'', obs:e.obs||'', st:e.status||'Entregue',
-      auth:{tp:e.auth_tipo, ts:e.auth_ts, facial:e.auth_facial, assinatura:e.auth_assinatura},
-      hash:e.hash||''
-    }));
-
-    if(pontos.data?.length) db.ponto = pontos.data.map(p=>({
-      id:p.id, fid:p.func_id, dt:p.data, hr:p.hora,
-      tp:p.tipo, dist:p.dist||'0', hash:p.hash||''
-    }));
-
-    if(rdos.data?.length) db.rdos = rdos.data.map(r=>({
-      id:r.id, num:r.numero, data:r.data, hora:r.hora,
-      local:r.local_obra, duracao:r.duracao, status:r.status,
-      climaManha:r.clima_manha, climaTarde:r.clima_tarde,
-      efetivo:r.efetivo, atividades:r.atividades,
-      ocorrencias:r.ocorrencias, observacoes:r.observacoes,
-      resp:r.responsavel, respFunc:r.resp_funcao, fotos:r.fotos||[]
-    }));
-
-    if(bms.data?.length) db.bms = bms.data.map(b=>({
-      id:b.id, num:b.numero, status:b.status,
-      contrato:b.contrato, periodo:b.periodo,
-      vbruto:b.valor_bruto, iss:b.iss_perc, inss:b.inss_perc,
-      obs:b.obs, itens:b.itens||[]
-    }));
-
-    if(ddsList.data?.length) db.dds = ddsList.data.map(d=>({
-      id:d.id, num:d.numero, data:d.data, tema:d.tema,
-      ata:d.ata, participantes:d.participantes||[], fotos:d.fotos||[],
-      resp:d.responsavel, status:d.status
-    }));
-
-    // Salvar no localStorage
-    sv();
-    esconderLoadingSync();
-    mostrarStatusSync(true);
-    
-    // Atualizar telas
-    renderDash(); popEpiSelects(); updBdgEpi(); updBdgAlmo();
-    toast('☁️ Dados sincronizados do Supabase!');
-    
-  }catch(e){
-    console.error('Erro ao buscar Supabase:', e);
-    esconderLoadingSync();
-    mostrarStatusSync(false);
-  }
+  // Supabase em modo silencioso — não bloqueia o sistema
+  mostrarStatusSync(false);
+  console.log('[Supabase] Sync em background...');
+  setTimeout(async ()=>{
+    try{
+      if(typeof supa === 'undefined') return;
+      const { data, error } = await supa.from('funcionarios')
+        .select('id').eq('obra_id', obraId).limit(1);
+      if(!error && data) mostrarStatusSync(true);
+    }catch(e){ console.warn('[Supabase] Offline:', e.message); }
+  }, 3000);
 }
-
 /* Sincronizar dados locais para Supabase (em background) */
 async function sincronizarParaSupa(obraId){
   try{
