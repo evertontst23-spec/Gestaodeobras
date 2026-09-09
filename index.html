@@ -546,6 +546,41 @@ textarea{resize:vertical;min-height:60px;line-height:1.6}
 #loginScreen.logado { display: none !important; }
 .app { display: none; }
 .app.logado { display: flex !important; }
+
+/* ── ORDEM DE SERVIÇO — Checkboxes ── */
+#os_riscos_grid input[type="checkbox"],
+#os_epis_grid input[type="checkbox"] {
+  width: 18px !important;
+  height: 18px !important;
+  min-width: 18px !important;
+  max-width: 18px !important;
+  flex-shrink: 0 !important;
+  cursor: pointer !important;
+  accent-color: #1a4fa8;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+  border-radius: 3px !important;
+  box-shadow: none !important;
+}
+#os_riscos_grid label,
+#os_epis_grid label {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  cursor: pointer !important;
+  font-size: 13px !important;
+  padding: 6px 8px !important;
+  border-radius: 6px !important;
+  border: 1px solid #e2e8f0 !important;
+  background: #fff !important;
+  user-select: none;
+}
+#os_riscos_grid label:hover,
+#os_epis_grid label:hover {
+  background: #eff6ff !important;
+  border-color: #1a4fa8 !important;
+}
 </style>
 </head>
 <body>
