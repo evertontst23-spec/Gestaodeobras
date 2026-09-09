@@ -316,16 +316,21 @@ input:not([type="checkbox"]):not([type="radio"]),select,textarea{
   border:1.5px solid var(--bd);border-radius:var(--rs);
   font-size:13px;font-family:'Inter',inherit;
   outline:none;transition:all .15s;
-  background:var(--sf);color:var(--tx);-webkit-appearance:none;
+  background:var(--sf);color:var(--tx);
 }
 input[type="checkbox"],input[type="radio"]{
-  width:18px !important;height:18px !important;
-  min-width:18px !important;max-width:18px !important;
-  padding:0 !important;margin:0 !important;
-  cursor:pointer;flex-shrink:0;
-  -webkit-appearance:auto !important;
-  appearance:auto !important;
-  accent-color:var(--blue,#1a4fa8);
+  width:18px !important;
+  height:18px !important;
+  min-width:18px !important;
+  max-width:18px !important;
+  padding:0 !important;
+  margin:0 !important;
+  cursor:pointer !important;
+  flex-shrink:0 !important;
+  accent-color:#1a4fa8;
+  border:1.5px solid #94a3b8 !important;
+  border-radius:3px !important;
+  background:#fff !important;
 }
 input:focus,select:focus,textarea:focus{
   border-color:var(--gold);
