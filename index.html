@@ -2092,7 +2092,7 @@ function devolverEpi(entregaId, funcId){
   const ep = db.epis.find(x=>x.id===e.eid)||{};
   const f = db.funcionarios.find(x=>x.id===funcId)||{};
   
-  if(!confirm(`↩ DEVOLUÇÃO DE EPI\n\nFuncionário: ${f.nome}\nEPI: ${ep.nome} (CA ${ep.ca||'—'})\nQuantidade: ${e.qty||1} un.\n\nConfirmar devolução? O item voltará ao estoque.`)) return;
+  if(!confirm(`↩ DEVOLUÇÃO DE EPI\n\nFuncionário: ${f.nome}\nEPI: ${ep.nome} (CA ${ep.ca||'—'})\nQuantidade: ${e.qty||1} un.\n\nConfirmar devolução? O registro ficará no histórico.`)) return;
   
   const agora = new Date();
   const dtDev = agora.toLocaleDateString('pt-BR');
@@ -2104,15 +2104,13 @@ function devolverEpi(entregaId, funcId){
   e.hrDevolucao = hrDev;
   e.tsDevolucao = agora.toISOString();
   
-  // Devolver ao estoque
-  const epi = db.epis.find(x=>x.id===e.eid);
-  if(epi){ epi.qty += (e.qty||1); }
+  // EPI devolvido — NÃO retorna ao estoque (equipamento descartado/vencido)
   
   sv();
   renderFicha();
   updBdgEpi();
   
-  toast(`✅ ${ep.nome} devolvido em ${dtDev} às ${hrDev} — estoque atualizado!`);
+  toast(`✅ ${ep.nome} devolvido em ${dtDev} às ${hrDev}!`);
 }
 
 /* ── FICHA INDIVIDUAL DE EPI ── */
