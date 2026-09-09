@@ -1757,6 +1757,12 @@ function renderEpiEst(){
   document.getElementById('tbEE').innerHTML=db.epis.filter(e=>!busca||e.nome.toLowerCase().includes(busca)||e.ca.includes(busca)).map(e=>{const v=caVnc(e);const sc=v||e.qty===0?'brd':e.qty<e.min?'bwn':'bgn';const sm=v?'CA Vencido':e.qty===0?'Sem estoque':e.qty<e.min?'Baixo':'Normal';return`<tr><td style="font-weight:500">${e.nome}</td><td><span class="badge bbl" style="font-size:10px">${e.ca}</span></td><td style="font-size:12px">${e.cat}</td><td style="font-size:12px;${v?'color:var(--er);font-weight:600':''}">${e.val||'—'}</td><td><div style="display:flex;align-items:center;gap:4px"><button class="btn bo bsm" onclick="ajEpi(${e.id},-1)">−</button><b style="min-width:24px;text-align:center">${e.qty}</b><button class="btn bo bsm" onclick="ajEpi(${e.id},1)">+</button></div></td><td style="text-align:center">${e.min}</td><td><span class="badge ${sc}">${sm}</span></td><td><div style="display:flex;gap:3px"><button class="btn bo bsm" onclick="edtEpi(${e.id})">Editar</button><button class="btn bd2 bsm" onclick="delEpi(${e.id})">✕</button></div></td></tr>`}).join('');updBdgEpi();
 }
 function ajEpi(id,d){const e=db.epis.find(x=>x.id===id);if(!e)return;e.qty=Math.max(0,e.qty+d);sv();renderEpiEst()}
+function updBdgSol(){
+  const pend = (db.solicitacoes||[]).filter(s=>s.status==='Pendente').length;
+  const el = document.getElementById('bdgSol');
+  if(el){ el.style.display = pend>0?'inline-flex':'none'; el.textContent=pend; }
+}
+
 function updBdgEpi(){const b=document.getElementById('bdgEpi');const n=db.epis.filter(e=>e.qty<e.min||caVnc(e)).length;b.textContent=n;n>0?b.classList.remove('hidden'):b.classList.add('hidden')}
 function abrirMEpi(){eIDs.epi=null;document.getElementById('epiMT').textContent='Novo EPI';['me_nome','me_ca','me_val'].forEach(i=>document.getElementById(i).value='');document.getElementById('me_qty').value=0;document.getElementById('me_min').value=5;document.getElementById('me_cat').selectedIndex=0;document.getElementById('ovEpi').classList.remove('hidden')}
 function edtEpi(id){const e=db.epis.find(x=>x.id===id);if(!e)return;eIDs.epi=id;document.getElementById('epiMT').textContent='Editar EPI';document.getElementById('me_nome').value=e.nome;document.getElementById('me_ca').value=e.ca;document.getElementById('me_cat').value=e.cat;document.getElementById('me_val').value=e.val||'';document.getElementById('me_qty').value=e.qty;document.getElementById('me_min').value=e.min;document.getElementById('ovEpi').classList.remove('hidden')}
