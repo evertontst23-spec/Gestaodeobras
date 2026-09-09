@@ -540,6 +540,12 @@ textarea{resize:vertical;min-height:60px;line-height:1.6}
   #navDrawer{display:none!important}
   #barraInferior{display:none!important}
 }
+
+/* FALLBACK: garantir que loginScreen sempre aparece */
+#loginScreen { display: flex !important; }
+#loginScreen.logado { display: none !important; }
+.app { display: none; }
+.app.logado { display: flex !important; }
 </style>
 </head>
 <body>
@@ -4749,8 +4755,11 @@ function fazerLogin(){
   try{ carregarObra('vila_brasil'); }catch(e){ db=criarDbVazio(OBRAS.vila_brasil); obraAtual=OBRAS.vila_brasil; }
   try{ sincUsuarios(); }catch(e){}
 
-  // Esconder login
+  // Esconder login e mostrar app
+  document.getElementById('loginScreen').classList.add('logado');
   document.getElementById('loginScreen').style.display = 'none';
+  const appEl = document.querySelector('.app');
+  if(appEl){ appEl.classList.add('logado'); appEl.style.display = 'flex'; }
 
   // Perfil
   perfilAtual = u.perfil;
