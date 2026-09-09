@@ -311,12 +311,21 @@ tbody tr{transition:background .1s}
   color:var(--mu);margin-bottom:6px;
   text-transform:uppercase;letter-spacing:.06em;
 }
-input,select,textarea{
+input:not([type="checkbox"]):not([type="radio"]),select,textarea{
   width:100%;padding:10px 14px;
   border:1.5px solid var(--bd);border-radius:var(--rs);
   font-size:13px;font-family:'Inter',inherit;
   outline:none;transition:all .15s;
   background:var(--sf);color:var(--tx);-webkit-appearance:none;
+}
+input[type="checkbox"],input[type="radio"]{
+  width:18px !important;height:18px !important;
+  min-width:18px !important;max-width:18px !important;
+  padding:0 !important;margin:0 !important;
+  cursor:pointer;flex-shrink:0;
+  -webkit-appearance:auto !important;
+  appearance:auto !important;
+  accent-color:var(--blue,#1a4fa8);
 }
 input:focus,select:focus,textarea:focus{
   border-color:var(--gold);
