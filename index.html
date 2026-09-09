@@ -5096,41 +5096,46 @@ async function fazerLogin(){
   resetarTentativas(user);
   iniciarSessao(u);
 
-  // Migrar dados antigos se necessário
-  const _ant = localStorage.getItem('kairon_v4');
-  if(_ant && !localStorage.getItem('kairon_vila_brasil')){
-    localStorage.setItem('kairon_vila_brasil', _ant);
-  }
+  // Migrar dados antigos
+  try{
+    const _ant = localStorage.getItem('kairon_v4');
+    if(_ant && !localStorage.getItem('kairon_vila_brasil')){
+      localStorage.setItem('kairon_vila_brasil', _ant);
+    }
+  }catch(e){}
 
   // Carregar obra e dados
-  carregarObra('vila_brasil');
-  sincUsuarios();
+  try{ carregarObra('vila_brasil'); }catch(e){ console.warn('carregarObra:', e); db = criarDbVazio(OBRAS.vila_brasil); obraAtual = OBRAS.vila_brasil; }
+  try{ sincUsuarios(); }catch(e){}
 
-  // Esconder tela de login
-  document.getElementById('loginScreen').style.display = 'none';
-  document.getElementById('loginErro').style.display = 'none';
+  // ESCONDER LOGIN — forçar com todas as formas possíveis
+  const ls = document.getElementById('loginScreen');
+  if(ls){ ls.style.display = 'none'; ls.style.visibility = 'hidden'; ls.style.opacity = '0'; ls.style.zIndex = '-1'; }
 
-  // Definir perfil ativo
+  // Definir perfil
   perfilAtual = u.perfil;
-  const pb = document.getElementById('perfilBadge');
-  if(pb) pb.textContent = u.label || u.perfil;
+  try{
+    const pb = document.getElementById('perfilBadge');
+    if(pb) pb.textContent = u.label || u.perfil;
+  }catch(e){}
 
-  // Aplicar permissões de menu
-  aplicarPerfil(u.perfil);
+  // Aplicar perfil
+  try{ aplicarPerfil(u.perfil); }catch(e){ console.warn('aplicarPerfil:', e); }
 
-  // Renderizar dashboard
-  renderDash();
-  nav('dashboard');
-  popEpiSelects();
-  updBdgEpi();
-  updBdgAlmo();
-  if(typeof updBdgSol === 'function') updBdgSol();
+  // MOSTRAR APP — forçar exibição
+  const appEl = document.querySelector('.app');
+  if(appEl){ appEl.style.display = 'flex'; appEl.style.visibility = 'visible'; }
 
-  // Atualizar seletor de obra
-  setTimeout(()=>atualizarSeletorSidebar('vila_brasil'), 200);
+  // Renderizar
+  try{ renderDash(); }catch(e){ console.warn('renderDash:', e); }
+  try{ nav('dashboard'); }catch(e){ console.warn('nav:', e); }
+  try{ popEpiSelects(); updBdgEpi(); updBdgAlmo(); }catch(e){}
+  if(typeof updBdgSol === 'function') try{ updBdgSol(); }catch(e){}
 
-  // Log de acesso
-  registrarAcesso(u.nome||u.perfil, u.perfil);
+  setTimeout(()=>{
+    try{ atualizarSeletorSidebar('vila_brasil'); }catch(e){}
+    try{ registrarAcesso(u.nome||u.perfil, u.perfil); }catch(e){}
+  }, 300);
 }
 
 function aplicarPerfil(perfil){
