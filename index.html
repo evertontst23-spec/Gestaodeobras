@@ -4703,13 +4703,13 @@ function sincUsuarios(){
 
 /* Usuários e senhas — altere as senhas após o primeiro acesso */
 /* Senhas com hash SHA-256 + senha texto para compatibilidade */
-/* Senhas armazenadas como SHA-256 — CAD Engenharia e Segurança do Trabalho */
+/* Credenciais CAD Engenharia e SST */
 const USUARIOS = {
-  'master':     { hash:'aa4ce799dafd57ed87ee2afad12590c5f4086345d77090b0cda903d4518fe43e',     perfil:'master',      nome:'CAD Master',          label:'🛠️ CAD Master' },
-  'diretor':    { hash:'4c7075e9b24fb81d8370424d9166b5aba4e99ed3954e821c60a8b1bc60c4717c',    perfil:'diretor',     nome:'Diretoria FJ',         label:'👔 Diretoria' },
-  'seguranca':  { hash:'f47b297fa1dee83dccdae82cd67844c8d564ce45b5c02fee83bbbd8b98c22e53',  perfil:'seguranca',   nome:'Seg. Trabalho FJ',     label:'⚡ Seg. Trabalho' },
-  'almoxarife': { hash:'330363b88dbd42e673dbb1a8c66d7c3905bdbfdcb04ea225a0db9730decb6410', perfil:'almoxarife',  nome:'Almoxarifado FJ',      label:'📦 Almoxarifado' },
-  'rh':         { hash:'5284272d88b7baa9c29abf2c94e218d012ea89ca022be645885ec3a2a7c1fd76',         perfil:'financeiro',  nome:'RH FJ',                label:'👥 RH' },
+  'master':     { hash:'aa4ce799dafd57ed87ee2afad12590c5f4086345d77090b0cda903d4518fe43e',     perfil:'master',     nome:'CAD Master',       label:'🛠️ Master' },
+  'diretor':    { hash:'4c7075e9b24fb81d8370424d9166b5aba4e99ed3954e821c60a8b1bc60c4717c',    perfil:'diretor',    nome:'Diretoria FJ',      label:'👔 Diretoria' },
+  'seguranca':  { hash:'f47b297fa1dee83dccdae82cd67844c8d564ce45b5c02fee83bbbd8b98c22e53',  perfil:'seguranca',  nome:'Seg. Trabalho FJ',  label:'⚡ Seg. Trabalho' },
+  'almoxarife': { hash:'330363b88dbd42e673dbb1a8c66d7c3905bdbfdcb04ea225a0db9730decb6410', perfil:'almoxarife', nome:'Almoxarifado FJ',   label:'📦 Almoxarifado' },
+  'rh':         { hash:'5284272d88b7baa9c29abf2c94e218d012ea89ca022be645885ec3a2a7c1fd76',         perfil:'financeiro', nome:'RH FJ',             label:'👥 RH' },
 };
 
 /* Menus permitidos por perfil */
@@ -4728,89 +4728,81 @@ let perfilAtual = null;
 let ptStrFunc = null, ptLpFunc = null;
 
 async function fazerLogin(){
-  const user = document.getElementById('loginUser').value.trim().toLowerCase();
-  const pass = document.getElementById('loginPass').value;
-  const erro = document.getElementById('loginErro');
-  erro.style.display = 'none';
+  const userEl = document.getElementById('loginUser');
+  const passEl = document.getElementById('loginPass');
+  const erroEl = document.getElementById('loginErro');
+  
+  const user = (userEl.value||'').trim().toLowerCase();
+  const pass = (passEl.value||'').trim();
+  
+  erroEl.style.display = 'none';
+  
+  if(!user || !pass){
+    erroEl.textContent = 'Preencha usuário e senha.';
+    erroEl.style.display = 'block';
+    return;
+  }
 
-  // Verificar tentativas de login
+  // Verificar bloqueio
   if(!verificarTentativas(user)){
-    erro.innerHTML = '⛔ Muitas tentativas. Aguarde <span id="countdown">30</span> segundos.';
-    erro.style.display = 'block';
+    erroEl.innerHTML = '⛔ Muitas tentativas. Aguarde <span id="countdown">30</span> segundos.';
+    erroEl.style.display = 'block';
     iniciarContagem(user);
     return;
   }
 
+  // Gerar hash da senha
+  let hashDigitado = '';
+  try{
+    const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(pass));
+    hashDigitado = Array.from(new Uint8Array(buf)).map(x=>x.toString(16).padStart(2,'0')).join('');
+  }catch(e){
+    erroEl.textContent = 'Erro ao processar senha.';
+    erroEl.style.display = 'block';
+    return;
+  }
+
   const u = USUARIOS[user];
-  if(!u){
+  if(!u || u.hash !== hashDigitado){
     registrarTentativa(user);
-    erro.style.display = 'block';
-    document.getElementById('loginPass').value = '';
+    erroEl.textContent = '❌ Usuário ou senha incorretos.';
+    erroEl.style.display = 'block';
+    passEl.value = '';
     return;
   }
 
-  // Aceitar senha direta OU hash SHA-256
-  let autenticado = false;
-  if(u.senha && u.senha === pass){
-    // Senha em texto puro (compatibilidade)
-    autenticado = true;
-  } else if(u.hash){
-    // Verificar hash
-    const hashDigitado = await gHash(pass);
-    autenticado = (u.hash === hashDigitado);
-  }
-
-  if(!autenticado){
-    registrarTentativa(user);
-    erro.style.display = 'block';
-    document.getElementById('loginPass').value = '';
-    return;
-  }
-
-  // Login bem-sucedido
+  // LOGIN OK
   resetarTentativas(user);
   iniciarSessao(u);
 
   // Migrar dados antigos
   try{
-    const _ant = localStorage.getItem('kairon_v4');
-    if(_ant && !localStorage.getItem('kairon_vila_brasil')){
-      localStorage.setItem('kairon_vila_brasil', _ant);
+    const ant = localStorage.getItem('kairon_v4');
+    if(ant && !localStorage.getItem('kairon_vila_brasil')){
+      localStorage.setItem('kairon_vila_brasil', ant);
     }
   }catch(e){}
 
-  // Carregar obra e dados
-  try{ carregarObra('vila_brasil'); }catch(e){ console.warn('carregarObra:', e); db = criarDbVazio(OBRAS.vila_brasil); obraAtual = OBRAS.vila_brasil; }
+  // Carregar dados
+  try{ carregarObra('vila_brasil'); }catch(e){ db = criarDbVazio(OBRAS.vila_brasil); obraAtual = OBRAS.vila_brasil; }
   try{ sincUsuarios(); }catch(e){}
 
-  // ESCONDER LOGIN — forçar com todas as formas possíveis
+  // Esconder login
   const ls = document.getElementById('loginScreen');
-  if(ls){ ls.style.display = 'none'; ls.style.visibility = 'hidden'; ls.style.opacity = '0'; ls.style.zIndex = '-1'; }
+  if(ls){ ls.style.display='none'; ls.style.visibility='hidden'; ls.style.zIndex='-1'; }
 
   // Definir perfil
   perfilAtual = u.perfil;
-  try{
-    const pb = document.getElementById('perfilBadge');
-    if(pb) pb.textContent = u.label || u.perfil;
-  }catch(e){}
+  try{ document.getElementById('perfilBadge').textContent = u.label||u.perfil; }catch(e){}
 
-  // Aplicar perfil
-  try{ aplicarPerfil(u.perfil); }catch(e){ console.warn('aplicarPerfil:', e); }
-
-  // MOSTRAR APP — forçar exibição
-  const appEl = document.querySelector('.app');
-  if(appEl){ appEl.style.display = 'flex'; appEl.style.visibility = 'visible'; }
-
-  // Renderizar
-  try{ renderDash(); }catch(e){ console.warn('renderDash:', e); }
-  try{ nav('dashboard'); }catch(e){ console.warn('nav:', e); }
+  // Aplicar menu e renderizar
+  try{ aplicarPerfil(u.perfil); }catch(e){}
+  try{ renderDash(); }catch(e){}
+  try{ nav('dashboard'); }catch(e){}
   try{ popEpiSelects(); updBdgEpi(); updBdgAlmo(); }catch(e){}
-  if(typeof updBdgSol === 'function') try{ updBdgSol(); }catch(e){}
-
-  setTimeout(()=>{
-    try{ atualizarSeletorSidebar('vila_brasil'); }catch(e){}
-    try{ registrarAcesso(u.nome||u.perfil, u.perfil); }catch(e){}
-  }, 300);
+  try{ if(typeof updBdgSol==='function') updBdgSol(); }catch(e){}
+  setTimeout(()=>{ try{ atualizarSeletorSidebar('vila_brasil'); }catch(e){} }, 300);
+  setTimeout(()=>{ try{ registrarAcesso(u.nome||u.perfil, u.perfil); }catch(e){} }, 500);
 }
 
 function aplicarPerfil(perfil){
