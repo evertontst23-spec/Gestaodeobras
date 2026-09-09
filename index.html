@@ -1468,7 +1468,10 @@ let db = {
 function sv(){
   if(!obraAtual) return;
   const chave = 'kairon_'+obraAtual.id;
-  localStorage.setItem(chave, JSON.stringify(db));
+  const dados = JSON.stringify(db);
+  localStorage.setItem(chave, dados);
+  localStorage.setItem(chave+'_ts', Date.now().toString());
+  sbSync(); // salvar no Supabase em background
 }
 
 /* estado */
@@ -4207,9 +4210,17 @@ function carregarObra(id){
   
   atualizarIdentidadeObra(ob);
 
-  // Supabase em background — não bloqueia
+  // Tentar carregar versão mais recente do Supabase
   mostrarStatusSync(false);
-  setTimeout(()=>buscarDoSupabase(id), 3000);
+  setTimeout(async ()=>{
+    const atualizou = await sbPull(id);
+    if(atualizou){
+      // Dados atualizados do Supabase — re-renderizar
+      if(typeof renderDash === 'function') renderDash();
+      if(typeof popEpiSelects === 'function') popEpiSelects();
+      if(typeof updBdgEpi === 'function') updBdgEpi();
+    }
+  }, 1500);
 }
 
 function criarDbVazio(ob){
@@ -4412,444 +4423,110 @@ function hexToRgb(hex){
 
 
 /* ══════════════════════════════════════
-   SUPABASE — SINCRONIZAÇÃO INTELIGENTE
-   LOCAL É SEMPRE A FONTE DA VERDADE
-   SUPABASE É O ESPELHO NA NUVEM
+   SUPABASE — SYNC SIMPLES E ESTÁVEL
+   Salva/carrega o db completo por obra
+   como JSON na tabela obras_data
 ══════════════════════════════════════ */
 
-/* Buscar dados do Supabase (só quando local vazio) */
-async function buscarDoSupabase(obraId){
-  // Supabase em modo silencioso — não bloqueia o sistema
-  mostrarStatusSync(false);
-  console.log('[Supabase] Sync em background...');
-  setTimeout(async ()=>{
-    try{
-      if(typeof supa === 'undefined') return;
-      const { data, error } = await supa.from('funcionarios')
-        .select('id').eq('obra_id', obraId).limit(1);
-      if(!error && data) mostrarStatusSync(true);
-    }catch(e){ console.warn('[Supabase] Offline:', e.message); }
-  }, 3000);
-}
-/* Sincronizar dados locais para Supabase (em background) */
-async function sincronizarParaSupa(obraId){
+/* ── PUSH: salvar obra no Supabase ── */
+async function sbPush(obraId){
+  if(typeof supa === 'undefined') return;
   try{
-    // Verificar conexão
-    const { error } = await supa.from('obras').select('id').eq('id',obraId).limit(1);
-    if(error){ mostrarStatusSync(false); return; }
-
-    // Sincronizar funcionários
-    for(const f of db.funcionarios){
-      const payload = {
-        obra_id: obraId,
-        nome: f.nome,
-        matricula: f.mat||'',
-        funcao: f.funcao||'',
-        setor: f.setor||'',
-        cpf: f.cpf||'',
-        face_descriptor: f.face ? JSON.stringify(f.face) : null
-      };
-      // Upsert por nome+obra (evita duplicatas)
-      await supa.from('funcionarios').upsert(
-        {...payload, id: typeof f.id === 'number' && f.id > 10000 ? f.id : undefined},
-        {onConflict: 'id', ignoreDuplicates: false}
-      );
-    }
-
-    // Sincronizar EPIs
-    for(const e of db.epis){
-      await supa.from('epis').upsert({
-        obra_id:obraId, nome:e.nome, ca:e.ca||'',
-        categoria:e.cat||'', validade:e.val||null, qty:e.qty||0, min_qty:e.min||5
-      }, {onConflict:'id'});
-    }
-
+    const payload = {
+      obra_id: obraId || obraAtual?.id || 'vila_brasil',
+      dados: JSON.stringify(db),
+      updated_at: new Date().toISOString()
+    };
+    await supa.from('obras_data').upsert(payload, {onConflict:'obra_id'});
+    sbOnline = true;
     mostrarStatusSync(true);
-    console.log('[Supabase] Sincronização concluída');
   }catch(e){
-    console.warn('[Supabase] Erro na sincronização:', e.message);
+    sbOnline = false;
     mostrarStatusSync(false);
+    console.warn('[Supabase] Push falhou:', e.message);
   }
 }
 
-/* Salvar funcionário no Supabase quando criado */
-async function sbSalvarFuncNovo(f, obraId){
+/* ── PULL: carregar obra do Supabase ── */
+async function sbPull(obraId){
+  if(typeof supa === 'undefined') return false;
   try{
-    const { data } = await supa.from('funcionarios').insert({
-      obra_id: obraId||obraAtual?.id||'vila_brasil',
-      nome:f.nome, matricula:f.mat||'', funcao:f.funcao||'',
-      setor:f.setor||'', cpf:f.cpf||''
-    }).select().single();
-    if(data) f._sbId = data.id;
-  }catch(e){ console.warn('Func não salvo no Supabase:', e.message); }
-}
+    const { data, error } = await supa
+      .from('obras_data')
+      .select('dados,updated_at')
+      .eq('obra_id', obraId)
+      .single();
 
-/* Salvar ponto no Supabase */
-async function sbPonto(p){
-  try{
-    await supa.from('registros_ponto').insert({
-      obra_id: obraAtual?.id||'vila_brasil',
-      func_id:p.fid, data:p.dt, hora:p.hr, tipo:p.tp, hash:p.hash
-    });
-  }catch(e){}
-}
+    if(error || !data) return false;
 
-/* Salvar entrega EPI no Supabase */
-async function sbEntrega(e){
-  try{
-    await supa.from('entregas_epi').insert({
-      obra_id: obraAtual?.id||'vila_brasil',
-      func_id:e.fid, epi_id:e.eid, qty:e.qty, data:e.dt,
-      motivo:e.mot, status:e.st, auth_tipo:e.auth?.tp,
-      auth_ts:e.auth?.ts, auth_facial:e.auth?.facial,
-      hash:e.hash
-    });
-  }catch(e){}
-}
+    const dadosSupa = JSON.parse(data.dados);
+    if(!dadosSupa || !dadosSupa.funcionarios) return false;
 
+    // Comparar com dados locais — usar o mais recente
+    const chave = 'kairon_' + obraId;
+    const localRaw = localStorage.getItem(chave);
+    const localTs = localStorage.getItem(chave + '_ts');
 
-/* ══════════════════════════════════════
-   GERAR PDF DA FICHA DE EPI
-══════════════════════════════════════ */
-async function salvarFichaPDF(){
-  const fid = parseInt(document.getElementById('fichaSelect')?.value);
-  const f = db.funcionarios.find(x=>x.id===fid);
-  if(!f){ toast('Selecione um funcionário','w'); return; }
+    const supaTs = new Date(data.updated_at).getTime();
+    const localTsNum = localTs ? parseInt(localTs) : 0;
 
-  toast('⏳ Gerando PDF...');
+    if(supaTs > localTsNum || !localRaw){
+      // Supabase é mais recente — usar dados do Supabase
+      db = dadosSupa;
+      const agora = Date.now();
+      localStorage.setItem(chave, data.dados);
+      localStorage.setItem(chave + '_ts', agora.toString());
+      console.log('[Supabase] Dados carregados da nuvem!');
+      sbOnline = true;
+      mostrarStatusSync(true);
+      return true;
+    }
 
-  const entregas = db.entregas.filter(e=>e.fid===fid);
-  const hoje = new Date().toLocaleString('pt-BR');
+    sbOnline = true;
+    mostrarStatusSync(true);
+    return false; // local já é mais recente
 
-  // Criar janela com o conteúdo completo para converter em PDF
-  const janela = window.open('','_blank','width=900,height=700');
-  
-  const estilos = `
-    <style>
-      *{box-sizing:border-box;margin:0;padding:0}
-      body{font-family:Arial,sans-serif;padding:20px;color:#111;background:#fff;font-size:12px}
-      .cabecalho{background:#1a56db;color:#fff;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;border-radius:8px 8px 0 0;margin-bottom:0}
-      .sub-cab{background:#1648c0;color:#fff;padding:6px 16px;font-size:10px;font-weight:700;border-bottom:3px solid #f59e0b;margin-bottom:16px}
-      .dados-worker{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:16px;padding:10px;background:#f8faff;border-radius:6px;border:1px solid #e0e2e8}
-      .dado-label{font-size:9px;color:#6b7280;text-transform:uppercase;font-weight:700}
-      .dado-valor{font-size:12px;font-weight:600;color:#111}
-      .declaracao{background:#fffbeb;border:1px solid #fcd34d;border-radius:6px;padding:8px;font-size:10px;color:#92400e;margin-bottom:16px;line-height:1.5}
-      .titulo-secao{font-size:11px;font-weight:700;color:#1a56db;text-transform:uppercase;border-bottom:2px solid #1a56db;padding-bottom:4px;margin-bottom:10px}
-      .entrega-card{border:1.5px solid #dcfce7;border-radius:8px;margin-bottom:12px;overflow:hidden}
-      .entrega-header{background:#15803d;color:#fff;padding:7px 12px;display:flex;justify-content:space-between;font-size:11px;font-weight:700}
-      .entrega-body{padding:10px 12px}
-      .entrega-info{display:flex;gap:16px;margin-bottom:10px;font-size:11px}
-      .conf-box{background:#fff;border:1px solid #dcfce7;border-radius:6px;padding:8px}
-      .conf-titulo{font-size:9px;font-weight:700;color:#6b7280;text-transform:uppercase;margin-bottom:6px}
-      .conf-conteudo{display:flex;align-items:center;gap:10px}
-      .conf-foto{width:70px;height:70px;border-radius:6px;object-fit:cover;border:2px solid #22c55e;flex-shrink:0}
-      .conf-foto-placeholder{width:70px;height:70px;border-radius:6px;background:#f0fdf4;border:2px solid #22c55e;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0}
-      .conf-nome{font-size:12px;font-weight:700;color:#15803d;margin-bottom:3px}
-      .conf-data{font-size:10px;color:#374151;margin-bottom:4px}
-      .badges{display:flex;gap:5px;flex-wrap:wrap}
-      .badge{font-size:9px;padding:2px 6px;border-radius:10px;font-weight:600}
-      .badge-blue{background:#dbeafe;color:#1d4ed8}
-      .badge-green{background:#dcfce7;color:#15803d}
-      .badge-purple{background:#f3e8ff;color:#7c3aed}
-      .hash-box{margin-top:8px;padding:5px 8px;background:#f8faff;border-radius:4px;border-left:3px solid #15803d}
-      .hash-label{font-size:8px;color:#6b7280;font-weight:700;margin-bottom:2px}
-      .hash-valor{font-size:8px;font-family:monospace;color:#374151;word-break:break-all}
-      .rodape{margin-top:20px;padding-top:10px;border-top:1px solid #e0e2e8;display:flex;justify-content:space-between;font-size:9px;color:#6b7280}
-      @media print{body{padding:10px}}
-    </style>
-  `;
-
-  const entregasHtml = entregas.map((e,i) => {
-    const ep = db.epis.find(x=>x.id===e.eid)||{};
-    const auth = e.auth||{};
-    const dtFmt = auth.ts ? new Date(auth.ts).toLocaleString('pt-BR') : (e.dt||'—');
-    const statusCor = e.st==='Devolvido' ? '#2563eb' : '#15803d';
-    const statusBg = e.st==='Devolvido' ? '#1d4ed8' : '#15803d';
-    
-    const fotoHtml = auth.facial && auth.facial.length > 100
-      ? `<img src="${auth.facial}" class="conf-foto" alt="Foto facial">`
-      : `<div class="conf-foto-placeholder">👤</div>`;
-
-    return `
-    <div class="entrega-card">
-      <div class="entrega-header" style="background:${statusBg}">
-        <span>ENTREGA #${String(i+1).padStart(2,'0')} — ${ep.nome||'EPI'}</span>
-        <span>${e.st||'Entregue'}</span>
-      </div>
-      <div class="entrega-body">
-        <div class="entrega-info">
-          <span><strong>CA:</strong> ${ep.ca||'—'}</span>
-          <span><strong>Qtd:</strong> ${e.qty||1} un.</span>
-          <span><strong>Motivo:</strong> ${e.mot||'—'}</span>
-          <span><strong>Data:</strong> ${e.dt||'—'}</span>
-        </div>
-        <div class="conf-box">
-          <div class="conf-titulo">Confirmação de Recebimento</div>
-          <div class="conf-conteudo">
-            ${fotoHtml}
-            <div>
-              <div class="conf-nome">✅ Identidade Confirmada — ${auth.tp==='facial'?'Reconhecimento Facial':'Confirmação Digital'}</div>
-              <div class="conf-data"><strong>${f.nome}</strong> — Mat. ${f.mat||'N/A'}</div>
-              <div class="conf-data">📅 ${dtFmt}</div>
-              <div class="badges">
-                <span class="badge badge-blue">Lei 14.063/2020</span>
-                <span class="badge badge-green">NR-6 · 6.6.1</span>
-                <span class="badge badge-purple">Ass. Eletrônica Avançada</span>
-              </div>
-            </div>
-          </div>
-          <div class="hash-box">
-            <div class="hash-label">🔐 HASH SHA-256 — Integridade do Registro</div>
-            <div class="hash-valor">${e.hash||'não gerado'}</div>
-          </div>
-        </div>
-      </div>
-    </div>`;
-  }).join('');
-
-  janela.document.write(`<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-  <meta charset="UTF-8">
-  <title>Ficha EPI — ${f.nome}</title>
-  ${estilos}
-</head>
-<body>
-  <div class="cabecalho">
-    <div>
-      <div style="font-size:15px;font-weight:800">⚡ CAD ENGENHARIA E SST</div>
-      <div style="font-size:9px;opacity:.8">Consultoria e Gestão em Segurança do Trabalho</div>
-    </div>
-    <div style="text-align:right">
-      <div style="font-size:13px;font-weight:700">FICHA DE CONTROLE DE EPI</div>
-      <div style="font-size:9px;opacity:.8">NR-6 / CLT Art.166 / Lei 14.063/2020</div>
-    </div>
-  </div>
-  <div class="sub-cab">
-    CONSTRUTORA MARDIFI LTDA &nbsp;·&nbsp; ${obraAtual?.nome||'URBANIZAÇÃO VILA BRASIL'} &nbsp;·&nbsp; ${obraAtual?.programa||'ProMorar · Prefeitura do Recife'}
-  </div>
-
-  <div class="titulo-secao">Dados do Trabalhador</div>
-  <div class="dados-worker">
-    <div><div class="dado-label">Nome Completo</div><div class="dado-valor">${f.nome}</div></div>
-    <div><div class="dado-label">Matrícula</div><div class="dado-valor">${f.mat||'—'}</div></div>
-    <div><div class="dado-label">CPF</div><div class="dado-valor">${f.cpf||'—'}</div></div>
-    <div><div class="dado-label">Função / Cargo</div><div class="dado-valor">${f.funcao||'—'}</div></div>
-    <div><div class="dado-label">Setor / Obra</div><div class="dado-valor">${f.setor||'—'}</div></div>
-    <div><div class="dado-label">Total de Entregas</div><div class="dado-valor">${entregas.filter(e=>e.st!=='Devolvido').length} ativo(s) · ${entregas.filter(e=>e.st==='Devolvido').length} devolvido(s)</div></div>
-  </div>
-
-  <div class="declaracao">
-    <strong>Declaração:</strong> O trabalhador acima identificado recebeu os EPIs listados nesta ficha, comprometendo-se a utilizá-los corretamente, conservá-los, comunicar ao empregador qualquer alteração que os torne impróprios para uso e cumprir as determinações do empregador sobre o assunto, nos termos da NR-6 e do Art.166 da CLT. A autenticação digital tem validade jurídica conforme a <strong>Lei 14.063/2020</strong>.
-  </div>
-
-  <div class="titulo-secao">Confirmações Digitais de Recebimento</div>
-  ${entregasHtml || '<p style="color:#999;text-align:center;padding:20px">Nenhuma entrega registrada</p>'}
-
-  <div class="rodape">
-    <span>Gerado em: ${hoje} · CAD Engenharia e SST v4.0 · gestaodeobras03.netlify.app</span>
-    <span>NR-6 · Portaria MTE 3.214/78 · CLT Art.166 · Lei 14.063/2020</span>
-  </div>
-
-  <script>window.onload=function(){setTimeout(function(){window.print();},600);}<\/script>
-</body>
-</html>`);
-  janela.document.close();
-}
-
-
-
-/* ══════════════════════════════════════
-   SOLICITAÇÕES DE MATERIAIS E EPIs
-   Acesso: almoxarife, seguranca, diretor, master
-══════════════════════════════════════ */
-if(!db.solicitacoes){ db.solicitacoes=[]; sv(); }
-if(!db.nids.sol) db.nids.sol=1;
-
-let solAtual = null;
-
-/* ── PERMISSÃO ── */
-function podResponderSol(){
-  return ['master','diretor','almoxarife','seguranca'].includes(perfilAtual);
-}
-
-/* ── BADGE ── */
-function updBdgSol(){
-  const pend = (db.solicitacoes||[]).filter(s=>s.status==='Pendente').length;
-  const el = document.getElementById('bdgSol');
-  if(el){ el.style.display = pend>0?'inline-flex':'none'; el.textContent=pend; }
-}
-
-/* ── LISTA ── */
-function renderSolicitacoes(){
-  updBdgSol();
-  const busca = (document.getElementById('buscaSol').value||'').toLowerCase();
-  const filSt = document.getElementById('filSolSt').value;
-  const filTp = document.getElementById('filSolTp').value;
-
-  const lista = [...(db.solicitacoes||[])].reverse().filter(s=>
-    (!filSt || s.status===filSt) &&
-    (!filTp || s.tipo===filTp) &&
-    (!busca || (s.item+s.solicitante+s.just).toLowerCase().includes(busca))
-  );
-
-  const total = db.solicitacoes.length;
-  const pend  = db.solicitacoes.filter(s=>s.status==='Pendente').length;
-  const aprov = db.solicitacoes.filter(s=>s.status==='Aprovada'||s.status==='Entregue').length;
-  const recus = db.solicitacoes.filter(s=>s.status==='Recusada').length;
-
-  document.getElementById('solStats').innerHTML=`
-    <div class="sc ca"><div class="lb">Total</div><div class="vl">${total}</div></div>
-    <div class="sc cw"><div class="lb">Pendentes</div><div class="vl">${pend}</div></div>
-    <div class="sc cg"><div class="lb">Aprovadas/Entregues</div><div class="vl">${aprov}</div></div>
-    <div class="sc cr"><div class="lb">Recusadas</div><div class="vl">${recus}</div></div>`;
-
-  const tb = document.getElementById('tbSol');
-  if(!lista.length){
-    tb.innerHTML=`<tr><td colspan="9" style="text-align:center;padding:28px;color:var(--mu)">Nenhuma solicitação encontrada</td></tr>`;
-    return;
-  }
-
-  const cores = {
-    'Pendente':  {bg:'#fef3c7',tx:'#d97706'},
-    'Em Análise':{bg:'#dbeafe',tx:'#1d4ed8'},
-    'Aprovada':  {bg:'#dcfce7',tx:'#15803d'},
-    'Recusada':  {bg:'#fee2e2',tx:'#dc2626'},
-    'Entregue':  {bg:'#f3e8ff',tx:'#7c3aed'},
-  };
-  const urgCor = {'Normal':'#6b7280','Urgente':'#d97706','Crítico':'#dc2626'};
-
-  tb.innerHTML = lista.map(s=>{
-    const c = cores[s.status]||{bg:'#f1f5f9',tx:'#475569'};
-    const podResp = podResponderSol();
-    return `<tr>
-      <td style="font-weight:700;color:var(--ac)">#${s.id}</td>
-      <td style="font-size:12px">${s.dt}<br><span style="font-size:10px;color:${urgCor[s.urg]||'#6b7280'};font-weight:600">${s.urg||'Normal'}</span></td>
-      <td><span class="badge ${s.tipo==='EPI'?'bbl':'bgy'}">${s.tipo}</span></td>
-      <td style="font-weight:600;font-size:13px">${s.item}</td>
-      <td style="text-align:center">${s.qty} ${s.un||'un'}</td>
-      <td style="font-size:12px">${s.solicitante}</td>
-      <td style="font-size:12px;color:var(--mu);max-width:180px">${s.just||'—'}</td>
-      <td><span style="background:${c.bg};color:${c.tx};padding:3px 9px;border-radius:12px;font-size:11px;font-weight:600">${s.status}</span>
-        ${s.respObs?`<div style="font-size:10px;color:var(--mu);margin-top:3px">${s.respObs}</div>`:''}
-      </td>
-      <td><div style="display:flex;gap:4px;flex-wrap:wrap">
-        ${podResp&&s.status!=='Entregue'?`<button class="btn bp bsm" onclick="responderSol(${s.id})">📋 Responder</button>`:''}
-        <button class="btn bd2 bsm" onclick="excluirSol(${s.id})">✕</button>
-      </div></td>
-    </tr>`;
-  }).join('');
-}
-
-/* ── NOVA SOLICITAÇÃO ── */
-function abrirNovaSolicitacao(){
-  solAtual = null;
-  document.getElementById('sol_tipo').value='';
-  document.getElementById('sol_item').innerHTML='<option value="">Selecione o tipo primeiro</option>';
-  document.getElementById('sol_qty').value=1;
-  document.getElementById('sol_un').value='un';
-  document.getElementById('sol_just').value='';
-  document.getElementById('sol_urg').value='Normal';
-  // Preencher solicitante com funcionários
-  const sel = document.getElementById('sol_func');
-  sel.innerHTML = '<option value="">Selecione o funcionário</option>' +
-    db.funcionarios.map(f=>`<option value="${f.nome}">${f.nome} — ${f.funcao||''}</option>`).join('');
-  document.getElementById('ovSol').classList.remove('hidden');
-}
-
-function atualizarItensSol(){
-  const tipo = document.getElementById('sol_tipo').value;
-  const sel = document.getElementById('sol_item');
-  if(tipo==='EPI'){
-    sel.innerHTML = '<option value="">Selecione o EPI</option>' +
-      db.epis.map(e=>`<option value="${e.nome}">${e.nome} (CA ${e.ca||'—'})</option>`).join('');
-    document.getElementById('sol_un').value='un';
-  } else if(tipo==='Material'){
-    sel.innerHTML = '<option value="">Selecione o Material</option>' +
-      db.materiais.map(m=>`<option value="${m.nome}">${m.nome}</option>`).join('');
-  } else {
-    sel.innerHTML = '<option value="">Selecione o tipo primeiro</option>';
+  }catch(e){
+    sbOnline = false;
+    mostrarStatusSync(false);
+    console.warn('[Supabase] Pull falhou:', e.message);
+    return false;
   }
 }
 
-function salvarSolicitacao(){
-  const tipo = document.getElementById('sol_tipo').value;
-  const item = document.getElementById('sol_item').value;
-  const qty  = parseInt(document.getElementById('sol_qty').value)||0;
-  const sol  = document.getElementById('sol_func').value;
-  const just = document.getElementById('sol_just').value;
-  const urg  = document.getElementById('sol_urg').value;
-  const un   = document.getElementById('sol_un').value;
-
-  if(!tipo||!item||qty<1||!sol){ toast('Preencha todos os campos obrigatórios','w'); return; }
-
-  const maxId = db.solicitacoes.length>0 ? Math.max(...db.solicitacoes.map(x=>x.id||0)) : 0;
-  const novoId = Math.max(maxId, db.nids.sol) + 1;
-  db.nids.sol = novoId + 1;
-
-  db.solicitacoes.push({
-    id: novoId,
-    dt: dHj(),
-    ts: new Date().toISOString(),
-    tipo, item, qty, un, urg,
-    solicitante: sol,
-    just,
-    status: 'Pendente',
-    respObs: '',
-    respPor: '',
-    respTs: ''
-  });
-
-  sv();
-  fM('ovSol');
-  renderSolicitacoes();
-  updBdgSol();
-  toast('✅ Solicitação enviada!');
+/* ── SYNC: chamar após cada sv() ── */
+let sbSyncTimer = null;
+function sbSync(){
+  // Debounce — aguarda 2s após último save para enviar
+  clearTimeout(sbSyncTimer);
+  sbSyncTimer = setTimeout(()=>{
+    sbPush(obraAtual?.id || 'vila_brasil');
+  }, 2000);
 }
 
-/* ── RESPONDER SOLICITAÇÃO ── */
-function responderSol(id){
-  if(!podResponderSol()){ toast('Sem permissão para responder solicitações','w'); return; }
-  solAtual = db.solicitacoes.find(s=>s.id===id);
-  if(!solAtual) return;
-
-  document.getElementById('solRespInfo').innerHTML=`
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-      <div><div style="font-size:10px;color:var(--mu);font-weight:700;text-transform:uppercase">Solicitante</div><div style="font-weight:600">${solAtual.solicitante}</div></div>
-      <div><div style="font-size:10px;color:var(--mu);font-weight:700;text-transform:uppercase">Tipo</div><div style="font-weight:600">${solAtual.tipo}</div></div>
-      <div><div style="font-size:10px;color:var(--mu);font-weight:700;text-transform:uppercase">Item</div><div style="font-weight:600">${solAtual.item}</div></div>
-      <div><div style="font-size:10px;color:var(--mu);font-weight:700;text-transform:uppercase">Quantidade</div><div style="font-weight:600">${solAtual.qty} ${solAtual.un||'un'}</div></div>
-      <div style="grid-column:1/-1"><div style="font-size:10px;color:var(--mu);font-weight:700;text-transform:uppercase">Justificativa</div><div>${solAtual.just||'—'}</div></div>
-    </div>`;
-
-  document.getElementById('sol_decisao').value='';
-  document.getElementById('sol_resp_obs').value='';
-  document.getElementById('ovSolResp').classList.remove('hidden');
+/* ── VERIFICAR CONEXÃO ── */
+async function verificarConexao(){
+  if(typeof supa === 'undefined'){ sbOnline = false; return false; }
+  try{
+    const { error } = await supa.from('obras_data').select('obra_id').limit(1);
+    sbOnline = !error;
+    mostrarStatusSync(sbOnline);
+    return sbOnline;
+  }catch(e){
+    sbOnline = false;
+    mostrarStatusSync(false);
+    return false;
+  }
 }
 
-function confirmarRespostaSol(){
-  if(!solAtual) return;
-  const decisao = document.getElementById('sol_decisao').value;
-  const obs = document.getElementById('sol_resp_obs').value;
-  if(!decisao){ toast('Selecione uma decisão','w'); return; }
-
-  solAtual.status = decisao;
-  solAtual.respObs = obs;
-  solAtual.respPor = perfilAtual;
-  solAtual.respTs = new Date().toISOString();
-
-  sv();
-  fM('ovSolResp');
-  renderSolicitacoes();
-  updBdgSol();
-  toast(`✅ Solicitação ${decisao.toLowerCase()}!`);
-}
-
-function excluirSol(id){
-  if(!confirm('Excluir esta solicitação?')) return;
-  db.solicitacoes = db.solicitacoes.filter(s=>s.id!==id);
-  sv(); renderSolicitacoes(); updBdgSol(); toast('Excluída');
-}
+/* ── FUNÇÕES LEGADAS (compatibilidade) ── */
+async function buscarDoSupabase(obraId){ await sbPull(obraId); }
+async function sincronizarParaSupa(obraId){ await sbPush(obraId); }
+async function sbSalvarPonto(p){ sbSync(); }
+async function sbEntrega(e){ sbSync(); }
+async function sbSalvarFuncNovo(f){ sbSync(); }
+function mostrarLoadingSync(){}
+function esconderLoadingSync(){}
 
 /* ══════════════════════════════════════
    CORREÇÃO DE IDs DUPLICADOS
