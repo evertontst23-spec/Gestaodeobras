@@ -1329,16 +1329,16 @@ textarea{resize:vertical;min-height:60px;line-height:1.6}
         <div class="fg">
           <label class="fl" style="margin-bottom:8px">Riscos Identificados</label>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px" id="os_riscos_grid">
-            <label onclick="toggleRisco(this,'Risco de Queda')" style="display:flex;align-items:center;gap:10px;padding:8px 12px;border:2px solid #e2e8f0;border-radius:8px;cursor:pointer;font-size:13px;background:#fff;transition:all .15s" id="lb_queda"><span style="width:20px;height:20px;border:2px solid #94a3b8;border-radius:4px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;font-size:14px" id="ck_queda"></span> Queda de altura</label>
-            <label onclick="toggleRisco(this,'Risco Elétrico')" style="display:flex;align-items:center;gap:10px;padding:8px 12px;border:2px solid #e2e8f0;border-radius:8px;cursor:pointer;font-size:13px;background:#fff;transition:all .15s" id="lb_eletrico"><span style="width:20px;height:20px;border:2px solid #94a3b8;border-radius:4px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;font-size:14px" id="ck_eletrico"></span> Risco elétrico</label>
-            <label onclick="toggleRisco(this,'Ruído')" style="display:flex;align-items:center;gap:10px;padding:8px 12px;border:2px solid #e2e8f0;border-radius:8px;cursor:pointer;font-size:13px;background:#fff;transition:all .15s" id="lb_ruido"><span style="width:20px;height:20px;border:2px solid #94a3b8;border-radius:4px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;font-size:14px" id="ck_ruido"></span> Ruído excessivo</label>
-            <label onclick="toggleRisco(this,'Agente Químico')" style="display:flex;align-items:center;gap:10px;padding:8px 12px;border:2px solid #e2e8f0;border-radius:8px;cursor:pointer;font-size:13px;background:#fff;transition:all .15s" id="lb_quimico"><span style="width:20px;height:20px;border:2px solid #94a3b8;border-radius:4px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;font-size:14px" id="ck_quimico"></span> Agentes químicos</label>
-            <label onclick="toggleRisco(this,'Esforço Físico')" style="display:flex;align-items:center;gap:10px;padding:8px 12px;border:2px solid #e2e8f0;border-radius:8px;cursor:pointer;font-size:13px;background:#fff;transition:all .15s" id="lb_fisico"><span style="width:20px;height:20px;border:2px solid #94a3b8;border-radius:4px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;font-size:14px" id="ck_fisico"></span> Esforço físico / ergonômico</label>
-            <label onclick="toggleRisco(this,'Máquinas e Equipamentos')" style="display:flex;align-items:center;gap:10px;padding:8px 12px;border:2px solid #e2e8f0;border-radius:8px;cursor:pointer;font-size:13px;background:#fff;transition:all .15s" id="lb_maquinas"><span style="width:20px;height:20px;border:2px solid #94a3b8;border-radius:4px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;font-size:14px" id="ck_maquinas"></span> Máquinas e equipamentos</label>
-            <label onclick="toggleRisco(this,'Escavação / Soterramento')" style="display:flex;align-items:center;gap:10px;padding:8px 12px;border:2px solid #e2e8f0;border-radius:8px;cursor:pointer;font-size:13px;background:#fff;transition:all .15s" id="lb_escavacao"><span style="width:20px;height:20px;border:2px solid #94a3b8;border-radius:4px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;font-size:14px" id="ck_escavacao"></span> Escavação / Soterramento</label>
-            <label onclick="toggleRisco(this,'Exposição Solar')" style="display:flex;align-items:center;gap:10px;padding:8px 12px;border:2px solid #e2e8f0;border-radius:8px;cursor:pointer;font-size:13px;background:#fff;transition:all .15s" id="lb_solar"><span style="width:20px;height:20px;border:2px solid #94a3b8;border-radius:4px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;font-size:14px" id="ck_solar"></span> Exposição solar / calor</label>
-            <label onclick="toggleRisco(this,'Tráfego / Trânsito')" style="display:flex;align-items:center;gap:10px;padding:8px 12px;border:2px solid #e2e8f0;border-radius:8px;cursor:pointer;font-size:13px;background:#fff;transition:all .15s" id="lb_transito"><span style="width:20px;height:20px;border:2px solid #94a3b8;border-radius:4px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;font-size:14px" id="ck_transito"></span> Tráfego / trânsito</label>
-            <label onclick="toggleRisco(this,'Agente Biológico')" style="display:flex;align-items:center;gap:10px;padding:8px 12px;border:2px solid #e2e8f0;border-radius:8px;cursor:pointer;font-size:13px;background:#fff;transition:all .15s" id="lb_biologico"><span style="width:20px;height:20px;border:2px solid #94a3b8;border-radius:4px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;font-size:14px" id="ck_biologico"></span> Agentes biológicos</label>
+            <label><input type="checkbox" class="os-risco-chk" value="Risco de Queda"> Queda de altura</label>
+            <label><input type="checkbox" class="os-risco-chk" value="Risco Elétrico"> Risco elétrico</label>
+            <label><input type="checkbox" class="os-risco-chk" value="Ruído"> Ruído excessivo</label>
+            <label><input type="checkbox" class="os-risco-chk" value="Agente Químico"> Agentes químicos</label>
+            <label><input type="checkbox" class="os-risco-chk" value="Esforço Físico"> Esforço físico / ergonômico</label>
+            <label><input type="checkbox" class="os-risco-chk" value="Máquinas e Equipamentos"> Máquinas e equipamentos</label>
+            <label><input type="checkbox" class="os-risco-chk" value="Escavação / Soterramento"> Escavação / Soterramento</label>
+            <label><input type="checkbox" class="os-risco-chk" value="Exposição Solar"> Exposição solar / calor</label>
+            <label><input type="checkbox" class="os-risco-chk" value="Tráfego / Trânsito"> Tráfego / trânsito</label>
+            <label><input type="checkbox" class="os-risco-chk" value="Agente Biológico"> Agentes biológicos</label>
           </div>
           <input id="risk_outros" placeholder="Outros riscos (descreva)..." style="margin-top:8px">
           <input id="risk_outros2" placeholder="Outros riscos (descreva)..." style="margin-top:4px">
@@ -2985,11 +2985,10 @@ function abrirOSRapida(){
   document.getElementById('os_atividades').value = '';
   document.getElementById('os_medidas').value = `1. Uso obrigatório dos EPIs listados acima em todo o período de trabalho.\n2. Verificar condições do local antes de iniciar as atividades.\n3. Não executar tarefas para as quais não foi treinado.\n4. Comunicar imediatamente ao supervisor qualquer condição de risco ou acidente.\n5. Participar dos DDS diários antes do início da jornada.\n6. Respeitar as sinalizações e isolamentos da obra.`;
   document.getElementById('os_resp').value = 'CAD Engenharia e SST — Técnico de Segurança do Trabalho';
-  // limpar checkboxes
-  ['risk_queda','risk_eletrico','risk_ruido','risk_quimico','risk_fisico','risk_maquinas','risk_escavacao','risk_solar','risk_transito','risk_biologico'].forEach(id=>{
-    const el=document.getElementById(id);if(el)el.checked=false;
-  });
-  document.getElementById('risk_outros').value='';
+  // limpar checkboxes de risco
+  document.querySelectorAll('.os-risco-chk').forEach(c=>{c.checked=false;});
+  const ro=document.getElementById('risk_outros');if(ro)ro.value='';
+  const ro2=document.getElementById('risk_outros2');if(ro2)ro2.value='';
   // EPIs
   const grid=document.getElementById('os_epis_check');
   grid.innerHTML=db.epis.map(e=>`<label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer"><input type="checkbox" class="os-epi-chk" value="${e.nome}"> ${e.nome}</label>`).join('');
@@ -6304,15 +6303,16 @@ function toggleRisco(lb, valor){
   }
 }
 function getRiscosSelecionados(){
+  const chks = [...document.querySelectorAll('.os-risco-chk:checked')].map(e=>e.value);
   const outros = document.getElementById('risk_outros')?.value?.trim();
   const outros2 = document.getElementById('risk_outros2')?.value?.trim();
-  const lista = [..._riscosOS];
-  if(outros) lista.push(outros);
-  if(outros2) lista.push(outros2);
-  return lista;
+  if(outros) chks.push(outros);
+  if(outros2) chks.push(outros2);
+  return chks;
 }
 function resetRiscosOS(){
   _riscosOS.clear();
+  document.querySelectorAll('.os-risco-chk').forEach(c=>{c.checked=false;});
   document.querySelectorAll('#os_riscos_grid label').forEach(lb=>{
     const ck = lb.querySelector('span');
     if(ck){ ck.textContent=''; ck.style.background=''; ck.style.borderColor='#94a3b8'; }
