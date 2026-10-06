@@ -2397,11 +2397,8 @@ function gerarDocumentoOS(){
 
   // Riscos
   const riscosSel=[];
-  ['risk_queda','risk_eletrico','risk_ruido','risk_quimico','risk_fisico','risk_maquinas','risk_escavacao','risk_solar','risk_transito','risk_biologico'].forEach(id=>{
-    const el=document.getElementById(id);if(el&&el.checked)riscosSel.push(el.value);
-  });
-  const riscosOtros=document.getElementById('risk_outros').value.trim();
-  if(riscosOtros)riscosSel.push(riscosOtros);
+  // Riscos selecionados via toggleRisco()
+  riscosSel.push(...getRiscosSelecionados());
 
   // EPIs selecionados
   const episSel=[...document.querySelectorAll('.os-epi-chk:checked')].map(e=>e.value);
