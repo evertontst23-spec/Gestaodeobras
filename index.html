@@ -808,6 +808,9 @@ textarea{resize:vertical;min-height:60px;line-height:1.6}
       <!-- Cabeçalho da Folha -->
       <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;align-items:center">
         <input type="month" id="folhaMes" onchange="renderFolha()" style="width:150px">
+        <select id="folhaObraFil" onchange="renderFolha()" style="min-width:200px;max-width:280px">
+          <option value="">Todas as obras</option>
+        </select>
         <button class="btn bp" onclick="fecharFolha()">✅ Fechar Folha</button>
         <button class="btn bo" onclick="imprimirFolha()">🖨️ Imprimir</button>
         <span id="folhaStatus" style="font-size:12px;padding:4px 10px;border-radius:12px;border:1px solid var(--bd)"></span>
@@ -816,7 +819,7 @@ textarea{resize:vertical;min-height:60px;line-height:1.6}
       <div class="card tw" style="overflow-x:auto">
         <table style="min-width:820px">
           <thead><tr>
-            <th>Funcionário</th><th>Função</th>
+            <th>Funcionário</th><th>Obra / C.Custo</th><th>Função</th>
             <th>Salário Base</th><th>Faltas</th><th>Desc. Faltas</th>
             <th>V. Alimentação</th><th>V. Transporte</th>
             <th>Total Benefícios</th><th>Líquido</th><th></th>
@@ -1069,7 +1072,7 @@ textarea{resize:vertical;min-height:60px;line-height:1.6}
 <div class="ov hidden" id="ovRec"><div class="modal mlg"><div class="mh"><h2 id="recMT">Nova Medição / Receita</h2><button class="mcl" onclick="fM('ovRec')">✕</button></div><div class="mb"><div class="fr3"><div class="fg"><label class="fl">BM / Referência</label><input id="mr_bm" placeholder="Ex: BM-11"></div><div class="fg"><label class="fl">Data Medição</label><input type="date" id="mr_dt"></div><div class="fg"><label class="fl">Vencimento</label><input type="date" id="mr_vc"></div></div><div class="fr2"><div class="fg"><label class="fl">Descrição *</label><input id="mr_desc" placeholder="Ex: Urbanização — Período Mai/25"></div><div class="fg"><label class="fl">Contratante</label><input id="mr_cont" placeholder="Ex: Vila Brasil Construções"></div></div><div class="fr3"><div class="fg"><label class="fl">Valor Bruto (R$) *</label><input type="number" id="mr_vb" min="0" step="0.01" oninput="calcRet()"></div><div class="fg"><label class="fl">Retenção ISS (%)</label><input type="number" id="mr_iss" value="2" min="0" step="0.01" oninput="calcRet()"></div><div class="fg"><label class="fl">Retenção INSS (%)</label><input type="number" id="mr_ins" value="11" min="0" step="0.01" oninput="calcRet()"></div></div><div class="fr3"><div class="fg"><label class="fl">Outras Retenções (R$)</label><input type="number" id="mr_or" value="0" min="0" step="0.01" oninput="calcRet()"></div><div class="fg"><label class="fl">Total Retenções (R$)</label><input id="mr_rt" readonly></div><div class="fg"><label class="fl">Valor Líquido (R$)</label><input id="mr_vl" readonly style="font-weight:700;color:var(--ok)"></div></div><div class="fr2"><div class="fg"><label class="fl">Nº Nota Fiscal</label><input id="mr_nf" placeholder="NF 00123"></div><div class="fg"><label class="fl">Status</label><select id="mr_st"><option>Pendente</option><option>Faturado</option><option>Recebido</option><option>Retido</option></select></div></div><div class="fg"><label class="fl">Observação</label><textarea id="mr_ob" placeholder="Observações..."></textarea></div></div><div class="mf"><button class="btn bo" onclick="fM('ovRec')">Cancelar</button><button class="btn bp" onclick="salvarRec()">Salvar</button></div></div></div>
 <div class="ov hidden" id="ovDesp"><div class="modal mlg"><div class="mh"><h2 id="despMT">Nova Despesa</h2><button class="mcl" onclick="fM('ovDesp')">✕</button></div><div class="mb"><div class="fr2"><div class="fg"><label class="fl">Descrição *</label><input id="md_desc" placeholder="Ex: Fornecimento de Areia"></div><div class="fg"><label class="fl">Categoria</label><select id="md_cat"><option>Material de Construção</option><option>Mão de Obra</option><option>Equipamentos / Locação</option><option>Transporte / Frete</option><option>Combustível</option><option>Serviços Terceirizados</option><option>Encargos / Impostos</option><option>Administrativo</option><option>EPI / Segurança</option><option>Outros</option></select></div></div><div class="fr3"><div class="fg"><label class="fl">Fornecedor</label><select id="md_forn"><option value="">Selecione...</option></select></div><div class="fg"><label class="fl">Data</label><input type="date" id="md_dt"></div><div class="fg"><label class="fl">Vencimento</label><input type="date" id="md_vc"></div></div><div class="fr3"><div class="fg"><label class="fl">Valor (R$) *</label><input type="number" id="md_val" min="0" step="0.01"></div><div class="fg"><label class="fl">Documento / NF</label><input id="md_doc"></div><div class="fg"><label class="fl">Status</label><select id="md_st"><option>A Pagar</option><option>Pago</option><option>Vencido</option></select></div></div><div class="fg"><label class="fl">Observação</label><textarea id="md_ob"></textarea></div></div><div class="mf"><button class="btn bo" onclick="fM('ovDesp')">Cancelar</button><button class="btn bp" onclick="salvarDesp()">Salvar</button></div></div></div>
 <div class="ov hidden" id="ovImp"><div class="modal"><div class="mh"><h2 id="impMT">Lançar Imposto</h2><button class="mcl" onclick="fM('ovImp')">✕</button></div><div class="mb"><div class="fr2"><div class="fg"><label class="fl">Tipo *</label><select id="mi_tp"><option>ISS</option><option>INSS</option><option>IRRF</option><option>PIS</option><option>COFINS</option><option>CSLL</option><option>ISSQN Retido</option><option>FGTS</option><option>Outro</option></select></div><div class="fg"><label class="fl">Competência</label><input type="month" id="mi_comp"></div></div><div class="fr3"><div class="fg"><label class="fl">Base Cálculo (R$)</label><input type="number" id="mi_base" min="0" step="0.01" oninput="calcImp()"></div><div class="fg"><label class="fl">Alíquota (%)</label><input type="number" id="mi_aliq" min="0" step="0.01" oninput="calcImp()"></div><div class="fg"><label class="fl">Valor (R$)</label><input type="number" id="mi_val" step="0.01"></div></div><div class="fr2"><div class="fg"><label class="fl">Vencimento</label><input type="date" id="mi_vc"></div><div class="fg"><label class="fl">Status</label><select id="mi_st"><option>A Recolher</option><option>Recolhido</option><option>Retido</option></select></div></div><div class="fg"><label class="fl">Referência / DARF / GPS</label><input id="mi_ref"></div></div><div class="mf"><button class="btn bo" onclick="fM('ovImp')">Cancelar</button><button class="btn bp" onclick="salvarImp()">Salvar</button></div></div></div>
-<div class="ov hidden" id="ovFunc"><div class="modal"><div class="mh"><h2 id="funcMT">Novo Funcionário</h2><button class="mcl" onclick="fM('ovFunc')">✕</button></div><div class="mb"><div class="fr2"><div class="fg"><label class="fl">Nome *</label><input id="mf_n"></div><div class="fg"><label class="fl">Matrícula *</label><input id="mf_m"></div></div><div class="fr2"><div class="fg"><label class="fl">Função</label><input id="mf_fc" placeholder="Ex: Pedreiro"></div><div class="fg"><label class="fl">Setor / Obra</label><input id="mf_s" placeholder="Ex: Bloco A"></div></div><div class="fg"><label class="fl">CPF</label><input id="mf_cpf" maxlength="14" placeholder="000.000.000-00"></div>
+<div class="ov hidden" id="ovFunc"><div class="modal"><div class="mh"><h2 id="funcMT">Novo Funcionário</h2><button class="mcl" onclick="fM('ovFunc')">✕</button></div><div class="mb"><div class="fr2"><div class="fg"><label class="fl">Nome *</label><input id="mf_n"></div><div class="fg"><label class="fl">Matrícula *</label><input id="mf_m"></div></div><div class="fr2"><div class="fg"><label class="fl">Função</label><input id="mf_fc" placeholder="Ex: Pedreiro"></div><div class="fg"><label class="fl">Obra / Centro de Custo *</label><select id="mf_obra" onchange="syncSetorObra(this)"><option value="">Selecione a obra...</option></select></div></div><div class="fg"><label class="fl">CPF</label><input id="mf_cpf" maxlength="14" placeholder="000.000.000-00"></div>
 <div style="border-top:1px solid var(--bd);margin:12px 0 10px;padding-top:10px"><span style="font-size:11px;font-weight:600;color:var(--mu);text-transform:uppercase;letter-spacing:.06em">💰 Dados Salariais</span></div>
 <div class="fr2"><div class="fg"><label class="fl">Salário Base (R$)</label><input id="mf_sal" type="number" step="0.01" placeholder="0,00"></div><div class="fg"><label class="fl">V. Alimentação / dia (R$)</label><input id="mf_ali" type="number" step="0.01" placeholder="0,00"></div></div>
 <div class="fr2"><div class="fg"><label class="fl">V. Transporte por dia (R$)</label><input id="mf_vt" type="number" step="0.01" placeholder="0,00"></div><div class="fg"><label class="fl">Qtd. Passagens / dia</label><input id="mf_np" type="number" step="1" min="0" placeholder="2"></div></div>
@@ -1338,7 +1341,7 @@ textarea{resize:vertical;min-height:60px;line-height:1.6}
             <label onclick="toggleRisco(this,'Agente Biológico')" style="display:flex;align-items:center;gap:10px;padding:8px 12px;border:2px solid #e2e8f0;border-radius:8px;cursor:pointer;font-size:13px;background:#fff;transition:all .15s" id="lb_biologico"><span style="width:20px;height:20px;border:2px solid #94a3b8;border-radius:4px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;font-size:14px" id="ck_biologico"></span> Agentes biológicos</label>
           </div>
           <input id="risk_outros" placeholder="Outros riscos (descreva)..." style="margin-top:8px">
-          <input id="risk_outros" placeholder="Outros riscos (descreva)..." style="margin-top:8px">
+          <input id="risk_outros2" placeholder="Outros riscos (descreva)..." style="margin-top:4px">
         </div>
 
         <div class="fg">
@@ -1941,7 +1944,27 @@ function salvarImp(){const tp=document.getElementById('mi_tp').value,val=parseFl
 function delImp(id){if(!confirm('Excluir?'))return;db.impostos=db.impostos.filter(x=>x.id!==id);sv();renderImpostos();toast('Excluído')}
 
 /* funcionários */
-function renderFuncs(){const busca=(document.getElementById('buscaF').value||'').toLowerCase(),hj=dHj();document.getElementById('tbF').innerHTML=db.funcionarios.filter(f=>!busca||f.nome.toLowerCase().includes(busca)||f.mat.includes(busca)).map(f=>{const ph=db.ponto.filter(r=>r.fid===f.id&&r.dt===hj);const ul=ph.length?ph[ph.length-1].tp+' '+ph[ph.length-1].hr:'—';const epiAtivos=db.entregas.filter(e=>e.fid===f.id&&e.st==='Entregue').length;return`<tr><td style="font-weight:600;color:var(--ac)">${f.mat}</td><td style="font-weight:500">${f.nome}<div style="font-size:11px;color:var(--mu)">${f.cpf||''}</div></td><td>${f.funcao}</td><td>${f.setor}</td><td>${f.face?`<span class="badge bgn">✅ Ok</span>`:`<span class="badge bwn">Pendente</span>`}</td><td style="font-size:12px">${ul}</td><td style="text-align:center"><span style="font-weight:700;color:var(--ok)">${epiAtivos}</span></td><td><div style="display:flex;gap:3px"><button class="btn bo bsm" onclick="edtFunc(${f.id})">Editar</button><button class="btn ${f.face?'bo':'bp'} bsm" onclick="abrirCadFace(${f.id})">${f.face?'🔄 Face':'📸 Face'}</button>${f.face?`<button class="btn bo bsm" onclick="rmFace(${f.id})">🗑</button>`:''}<button class="btn bp bsm" onclick="gerarFichaFunc(${f.id})">📋 Ficha</button><button class="btn bo bsm" onclick="abrirOSParaFunc(${f.id})">📋 OS</button><button class="btn bd2 bsm" onclick="delFunc(${f.id})">✕</button></div></td></tr>`}).join('')}
+
+/* ═══ Centro de Custo / Obra ═══ */
+function popObraSelect(elId, selected){
+  const el=document.getElementById(elId);
+  if(!el) return;
+  const obras=getObras()||[];
+  el.innerHTML='<option value="">Selecione a obra...</option>'+
+    obras.map(o=>`<option value="${o.id}" ${String(o.id)===String(selected)?'selected':''}>${o.nome||o.id}</option>`).join('');
+  // fallback: se selected não é id de obra, tenta match por nome
+  if(selected && !obras.find(o=>String(o.id)===String(selected))){
+    const byName=obras.find(o=>(o.nome||'').toLowerCase()===String(selected).toLowerCase());
+    if(byName) el.value=byName.id;
+    else el.value=''; // setor antigo sem obra cadastrada
+  }
+}
+
+function syncSetorObra(sel){
+  /* garante campo setor oculto compatível */
+}
+
+function renderFuncs(){const busca=(document.getElementById('buscaF').value||'').toLowerCase(),hj=dHj();document.getElementById('tbF').innerHTML=db.funcionarios.filter(f=>!busca||f.nome.toLowerCase().includes(busca)||f.mat.includes(busca)).map(f=>{const ph=db.ponto.filter(r=>r.fid===f.id&&r.dt===hj);const ul=ph.length?ph[ph.length-1].tp+' '+ph[ph.length-1].hr:'—';const epiAtivos=db.entregas.filter(e=>e.fid===f.id&&e.st==='Entregue').length;const obraLabel=f.obraNome||f.setor||'—';return`<tr><td style="font-weight:600;color:var(--ac)">${f.mat}</td><td style="font-weight:500">${f.nome}<div style="font-size:11px;color:var(--mu)">${f.cpf||''}</div></td><td>${f.funcao}</td><td style="font-size:12px">${obraLabel}</td><td>${f.face?`<span class="badge bgn">✅ Ok</span>`:`<span class="badge bwn">Pendente</span>`}</td><td style="font-size:12px">${ul}</td><td style="text-align:center"><span style="font-weight:700;color:var(--ok)">${epiAtivos}</span></td><td><div style="display:flex;gap:3px"><button class="btn bo bsm" onclick="edtFunc(${f.id})">Editar</button><button class="btn ${f.face?'bo':'bp'} bsm" onclick="abrirCadFace(${f.id})">${f.face?'🔄 Face':'📸 Face'}</button>${f.face?`<button class="btn bo bsm" onclick="rmFace(${f.id})">🗑</button>`:''}<button class="btn bp bsm" onclick="gerarFichaFunc(${f.id})">📋 Ficha</button><button class="btn bo bsm" onclick="abrirOSParaFunc(${f.id})">📋 OS</button><button class="btn bd2 bsm" onclick="delFunc(${f.id})">✕</button></div></td></tr>`}).join('')}
 function gerarFichaFunc(fid){
   nav('epi-ficha');
   setTimeout(()=>{
@@ -1949,20 +1972,41 @@ function gerarFichaFunc(fid){
     if(s){s.value=fid;renderFicha()}
   },100);
 }
-function abrirMFunc(){eIDs.f=null;document.getElementById('funcMT').textContent='Novo Funcionário';['mf_n','mf_m','mf_fc','mf_s','mf_cpf','mf_sal','mf_ali','mf_vt','mf_np','mf_dt','mf_banco'].forEach(i=>document.getElementById(i).value='');document.getElementById('ovFunc').classList.remove('hidden')}
-function edtFunc(id){const f=db.funcionarios.find(x=>x.id===id);if(!f)return;eIDs.f=id;document.getElementById('funcMT').textContent='Editar Funcionário';document.getElementById('mf_n').value=f.nome;document.getElementById('mf_m').value=f.mat;document.getElementById('mf_fc').value=f.funcao;document.getElementById('mf_s').value=f.setor;document.getElementById('mf_cpf').value=f.cpf||'';
+function abrirMFunc(){
+  eIDs.f=null;
+  document.getElementById('funcMT').textContent='Novo Funcionário';
+  ['mf_n','mf_m','mf_fc','mf_cpf','mf_sal','mf_ali','mf_vt','mf_np','mf_dt','mf_banco'].forEach(i=>document.getElementById(i).value='');
+  popObraSelect('mf_obra','');
+  document.getElementById('ovFunc').classList.remove('hidden');
+}
+function edtFunc(id){
+  const f=db.funcionarios.find(x=>x.id===id);if(!f)return;
+  eIDs.f=id;
+  document.getElementById('funcMT').textContent='Editar Funcionário';
+  document.getElementById('mf_n').value=f.nome;
+  document.getElementById('mf_m').value=f.mat;
+  document.getElementById('mf_fc').value=f.funcao;
+  document.getElementById('mf_cpf').value=f.cpf||'';
+  popObraSelect('mf_obra', f.obraId||f.setor||'');
   document.getElementById('mf_sal').value=f.sal||'';
   document.getElementById('mf_ali').value=f.ali||'';
   document.getElementById('mf_vt').value=f.vt||'';
   document.getElementById('mf_np').value=f.np||2;
   document.getElementById('mf_dt').value=f.dtm||22;
   document.getElementById('mf_banco').value=f.banco||'';
-  document.getElementById('ovFunc').classList.remove('hidden')}
+  document.getElementById('ovFunc').classList.remove('hidden');
+}
 function salvarFunc(){
   const n=document.getElementById('mf_n').value.trim();
   const m=document.getElementById('mf_m').value.trim();
   if(!n||!m){toast('Nome e matrícula obrigatórios','w');return}
-  const obj={nome:n,mat:m,funcao:document.getElementById('mf_fc').value,setor:document.getElementById('mf_s').value,cpf:document.getElementById('mf_cpf').value,
+  const obraEl=document.getElementById('mf_obra');
+  const obraId=obraEl?obraEl.value:'';
+  const obraNome=obraEl&&obraEl.selectedOptions[0]?obraEl.selectedOptions[0].text:'';
+  const obj={nome:n,mat:m,funcao:document.getElementById('mf_fc').value,
+    setor:obraNome||obraId,  /* compatibilidade legada */
+    obraId,obraNome,
+    cpf:document.getElementById('mf_cpf').value,
     sal:parseFloat(document.getElementById('mf_sal').value)||0,
     ali:parseFloat(document.getElementById('mf_ali').value)||0,
     vt:parseFloat(document.getElementById('mf_vt').value)||0,
@@ -2099,10 +2143,30 @@ function renderFolha(){
   const mes = document.getElementById('folhaMes').value || new Date().toISOString().slice(0,7);
   const [ano,mesN] = mes.split('-').map(Number);
 
-  // Calcular faltas de cada funcionário no mês pelo ponto
-  const funcs = db.funcionarios;
+  // Popular select de obras
+  const obraFilEl = document.getElementById('folhaObraFil');
+  const obraFil = obraFilEl ? obraFilEl.value : '';
+  if(obraFilEl){
+    const obras = getObras()||[];
+    const curVal = obraFilEl.value;
+    obraFilEl.innerHTML = '<option value="">Todas as obras</option>'+
+      obras.map(o=>`<option value="${o.id}" ${String(o.id)===String(curVal)?'selected':''}>${o.nome||o.id}</option>`).join('');
+    obraFilEl.value = curVal;
+  }
+
+  // Filtrar funcionários pela obra selecionada
+  const todasFuncs = db.funcionarios;
+  const funcs = obraFil
+    ? todasFuncs.filter(f=>String(f.obraId)===String(obraFil) || (!f.obraId && (f.setor||'')===(getObra(obraFil)||{}).nome))
+    : todasFuncs;
+
+  if(!todasFuncs.length){
+    document.getElementById('tbFolha').innerHTML='<tr><td colspan="11" style="text-align:center;padding:28px;color:var(--mu)">Nenhum funcionário cadastrado</td></tr>';
+    document.getElementById('folhaSg').innerHTML='';
+    return;
+  }
   if(!funcs.length){
-    document.getElementById('tbFolha').innerHTML='<tr><td colspan="10" style="text-align:center;padding:28px;color:var(--mu)">Nenhum funcionário cadastrado</td></tr>';
+    document.getElementById('tbFolha').innerHTML='<tr><td colspan="11" style="text-align:center;padding:28px;color:var(--mu)">Nenhum funcionário nesta obra</td></tr>';
     document.getElementById('folhaSg').innerHTML='';
     return;
   }
@@ -2161,6 +2225,7 @@ function renderFolha(){
   document.getElementById('tbFolha').innerHTML = rows.map(({f,salBase,faltas,descFalta,vali,vt,totalBen,liquido,aliDia,vtDia,npDia,fonteDados})=>`
     <tr style="${salBase===0?'background:#fff7ed':''}">
       <td style="font-weight:500">${f.nome}<div style="font-size:10px;color:var(--mu)">${f.mat}${f.banco?' · '+f.banco:''}</div></td>
+      <td style="font-size:11px;color:var(--mu)">${f.obraNome||f.setor||'—'}</td>
       <td style="font-size:12px">${f.funcao||'—'}<span style="font-size:10px;color:var(--mu)">${fonteDados}</span></td>
       <td style="font-weight:600;color:${salBase===0?'var(--er)':'var(--tx)'}">R$ ${R(salBase)}
         <div style="font-size:10px;color:var(--mu);font-weight:400">base mensal</div></td>
@@ -2177,7 +2242,7 @@ function renderFolha(){
 
   document.getElementById('tfFolha').innerHTML=`
     <tr style="background:var(--bg);font-weight:700;border-top:2px solid var(--bd2)">
-      <td colspan="2" style="font-size:13px">TOTAIS — ${funcs.length} funcionários</td>
+      <td colspan="3" style="font-size:13px">TOTAIS — ${funcs.length} funcionário(s)${obraFil?" · "+(getObra(obraFil)||{}).nome||"":"(todas as obras)"}</td>
       <td>R$ ${R(totalSalBruto)}</td>
       <td></td>
       <td style="color:var(--er)">R$ ${R(totalDesc)}</td>
@@ -2205,33 +2270,42 @@ function renderFolha(){
 
 function fecharFolha(){
   const mes = document.getElementById('folhaMes').value || new Date().toISOString().slice(0,7);
-  if(!confirm(`Fechar folha de ${mes}? Isso registra o pagamento como despesa no financeiro.`)) return;
+  const obraFilEl = document.getElementById('folhaObraFil');
+  const obraFil = obraFilEl ? obraFilEl.value : '';
+  const obraObj = obraFil ? getObra(obraFil) : null;
+  const obraNomeFechar = obraObj ? (obraObj.nome||obraFil) : 'Todas as obras';
+  const descFolha = obraFil
+    ? `Folha de Pagamento — ${mes} — ${obraNomeFechar}`
+    : `Folha de Pagamento — ${mes}`;
+  if(!confirm(`Fechar folha de ${mes}${obraFil?' · '+obraNomeFechar:''}?\nIsso registra o pagamento como despesa no financeiro.`)) return;
   if(!db.folhas) db.folhas=[];
-  // Calcular total
+  // Calcular total pelos dados da tabela renderizada
   const rows = document.querySelectorAll('#tbFolha tr');
   let total = 0;
   rows.forEach(r=>{
     const cells = r.querySelectorAll('td');
     if(cells.length>=9){
-      const v = parseFloat(cells[8].textContent.replace('R$','').replace('.','').replace(',','.').trim());
+      // liquido agora é a 9ª coluna (índice 8) — funcionário, obra, função, salBase, faltas, desc, ali, vt, totBen, LIQUIDO, btn
+      const v = parseFloat(cells[9].textContent.replace('R$','').replace(/\./g,'').replace(',','.').trim());
       if(!isNaN(v)) total+=v;
     }
   });
   const hoje = dHj();
-  // Salvar folha fechada
-  const jaFechada = db.folhas.find(x=>x.mes===mes);
+  // Salvar folha fechada — chave: mes + obraId
+  const chave = mes + (obraFil ? '_'+obraFil : '');
+  const jaFechada = db.folhas.find(x=>x.chave===chave);
   if(jaFechada){
-    if(!confirm('Esta folha já foi fechada. Atualizar?')) return;
+    if(!confirm('Esta folha já foi fechada. Atualizar o valor?')) return;
     jaFechada.total=total; jaFechada.fechadaEm=hoje;
   } else {
-    db.folhas.push({mes, total, fechadaEm:hoje, id: Date.now()});
+    db.folhas.push({mes, total, fechadaEm:hoje, id: Date.now(), chave, obraId:obraFil, obraNome:obraNomeFechar});
   }
   // Lançar como despesa automática
   if(!db.despesas) db.despesas=[];
-  const descExist = db.despesas.find(d=>d.folhaMes===mes);
+  const descExist = db.despesas.find(d=>d.folhaMes===chave);
   if(!descExist){
     const nId = (db.nids.desp||0)+1; db.nids.desp=nId;
-    db.despesas.push({id:nId, desc:`Folha de Pagamento — ${mes}`, cat:'Mão de Obra', dt:hoje, vc:hoje, val:total, st:'A Pagar', folhaMes:mes, ob:'Gerado automaticamente'});
+    db.despesas.push({id:nId, desc:descFolha, cat:'Mão de Obra', dt:hoje, vc:hoje, val:total, st:'A Pagar', folhaMes:chave, ob:'Gerado automaticamente'});
   } else {
     descExist.val=total; descExist.st='A Pagar';
   }
@@ -6214,28 +6288,27 @@ window.addEventListener('appinstalled',()=>{
 /* ── OS: Toggle riscos customizados ── */
 const _riscosOS = new Set();
 function toggleRisco(lb, valor){
-  const ck = lb.querySelector('span');
+  const ck = lb.querySelector('span') || lb.querySelector('input[type="checkbox"]');
   if(_riscosOS.has(valor)){
     _riscosOS.delete(valor);
-    ck.textContent='';
+    if(ck && ck.tagName==='SPAN'){ck.textContent='';ck.style.background='';ck.style.borderColor='#94a3b8';}
+    else if(ck){ck.checked=false;}
     lb.style.borderColor='#e2e8f0';
     lb.style.background='#fff';
-    ck.style.borderColor='#94a3b8';
-    ck.style.background='';
   } else {
     _riscosOS.add(valor);
-    ck.textContent='\u2713';
-    ck.style.color='#fff';
+    if(ck && ck.tagName==='SPAN'){ck.textContent='\u2713';ck.style.color='#fff';ck.style.borderColor='#1a4fa8';ck.style.background='#1a4fa8';}
+    else if(ck){ck.checked=true;}
     lb.style.borderColor='#1a4fa8';
     lb.style.background='#eff6ff';
-    ck.style.borderColor='#1a4fa8';
-    ck.style.background='#1a4fa8';
   }
 }
 function getRiscosSelecionados(){
   const outros = document.getElementById('risk_outros')?.value?.trim();
+  const outros2 = document.getElementById('risk_outros2')?.value?.trim();
   const lista = [..._riscosOS];
   if(outros) lista.push(outros);
+  if(outros2) lista.push(outros2);
   return lista;
 }
 function resetRiscosOS(){
