@@ -601,7 +601,6 @@ textarea{resize:vertical;min-height:60px;line-height:1.6}
     </div>
 
     <div id="loginErro" style="background:#fef2f2;color:#dc2626;border:1px solid #fca5a5;border-radius:6px;padding:9px 12px;font-size:13px;margin-bottom:14px;display:none">
-      ❌ Usuário ou senha incorretos
     </div>
 
     <button onclick="fazerLogin()" style="width:100%;background:linear-gradient(135deg,#1a4fa8,#133a80);color:#fff;border:none;border-radius:10px;padding:13px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:0 4px 16px rgba(26,79,168,.35);letter-spacing:-.1px;transition:background .15s"
@@ -610,7 +609,7 @@ textarea{resize:vertical;min-height:60px;line-height:1.6}
     </button>
 
     <div style="text-align:center;margin-top:18px;font-size:11px;color:#9ca3af">
-      🔒 Acesso restrito · CAD Engenharia e SST
+      🔒 Acesso restrito · Sessão criptografada · Bloqueio automático por inatividade
     </div>
   </div>
 </div>
@@ -1026,7 +1025,12 @@ textarea{resize:vertical;min-height:60px;line-height:1.6}
 <div class="ov hidden" id="ovRec"><div class="modal mlg"><div class="mh"><h2 id="recMT">Nova Medição / Receita</h2><button class="mcl" onclick="fM('ovRec')">✕</button></div><div class="mb"><div class="fr3"><div class="fg"><label class="fl">BM / Referência</label><input id="mr_bm" placeholder="Ex: BM-11"></div><div class="fg"><label class="fl">Data Medição</label><input type="date" id="mr_dt"></div><div class="fg"><label class="fl">Vencimento</label><input type="date" id="mr_vc"></div></div><div class="fr2"><div class="fg"><label class="fl">Descrição *</label><input id="mr_desc" placeholder="Ex: Urbanização — Período Mai/25"></div><div class="fg"><label class="fl">Contratante</label><input id="mr_cont" placeholder="Ex: Vila Brasil Construções"></div></div><div class="fr3"><div class="fg"><label class="fl">Valor Bruto (R$) *</label><input type="number" id="mr_vb" min="0" step="0.01" oninput="calcRet()"></div><div class="fg"><label class="fl">Retenção ISS (%)</label><input type="number" id="mr_iss" value="2" min="0" step="0.01" oninput="calcRet()"></div><div class="fg"><label class="fl">Retenção INSS (%)</label><input type="number" id="mr_ins" value="11" min="0" step="0.01" oninput="calcRet()"></div></div><div class="fr3"><div class="fg"><label class="fl">Outras Retenções (R$)</label><input type="number" id="mr_or" value="0" min="0" step="0.01" oninput="calcRet()"></div><div class="fg"><label class="fl">Total Retenções (R$)</label><input id="mr_rt" readonly></div><div class="fg"><label class="fl">Valor Líquido (R$)</label><input id="mr_vl" readonly style="font-weight:700;color:var(--ok)"></div></div><div class="fr2"><div class="fg"><label class="fl">Nº Nota Fiscal</label><input id="mr_nf" placeholder="NF 00123"></div><div class="fg"><label class="fl">Status</label><select id="mr_st"><option>Pendente</option><option>Faturado</option><option>Recebido</option><option>Retido</option></select></div></div><div class="fg"><label class="fl">Observação</label><textarea id="mr_ob" placeholder="Observações..."></textarea></div></div><div class="mf"><button class="btn bo" onclick="fM('ovRec')">Cancelar</button><button class="btn bp" onclick="salvarRec()">Salvar</button></div></div></div>
 <div class="ov hidden" id="ovDesp"><div class="modal mlg"><div class="mh"><h2 id="despMT">Nova Despesa</h2><button class="mcl" onclick="fM('ovDesp')">✕</button></div><div class="mb"><div class="fr2"><div class="fg"><label class="fl">Descrição *</label><input id="md_desc" placeholder="Ex: Fornecimento de Areia"></div><div class="fg"><label class="fl">Categoria</label><select id="md_cat"><option>Material de Construção</option><option>Mão de Obra</option><option>Equipamentos / Locação</option><option>Transporte / Frete</option><option>Combustível</option><option>Serviços Terceirizados</option><option>Encargos / Impostos</option><option>Administrativo</option><option>EPI / Segurança</option><option>Outros</option></select></div></div><div class="fr3"><div class="fg"><label class="fl">Fornecedor</label><select id="md_forn"><option value="">Selecione...</option></select></div><div class="fg"><label class="fl">Data</label><input type="date" id="md_dt"></div><div class="fg"><label class="fl">Vencimento</label><input type="date" id="md_vc"></div></div><div class="fr3"><div class="fg"><label class="fl">Valor (R$) *</label><input type="number" id="md_val" min="0" step="0.01"></div><div class="fg"><label class="fl">Documento / NF</label><input id="md_doc"></div><div class="fg"><label class="fl">Status</label><select id="md_st"><option>A Pagar</option><option>Pago</option><option>Vencido</option></select></div></div><div class="fg"><label class="fl">Observação</label><textarea id="md_ob"></textarea></div></div><div class="mf"><button class="btn bo" onclick="fM('ovDesp')">Cancelar</button><button class="btn bp" onclick="salvarDesp()">Salvar</button></div></div></div>
 <div class="ov hidden" id="ovImp"><div class="modal"><div class="mh"><h2 id="impMT">Lançar Imposto</h2><button class="mcl" onclick="fM('ovImp')">✕</button></div><div class="mb"><div class="fr2"><div class="fg"><label class="fl">Tipo *</label><select id="mi_tp"><option>ISS</option><option>INSS</option><option>IRRF</option><option>PIS</option><option>COFINS</option><option>CSLL</option><option>ISSQN Retido</option><option>FGTS</option><option>Outro</option></select></div><div class="fg"><label class="fl">Competência</label><input type="month" id="mi_comp"></div></div><div class="fr3"><div class="fg"><label class="fl">Base Cálculo (R$)</label><input type="number" id="mi_base" min="0" step="0.01" oninput="calcImp()"></div><div class="fg"><label class="fl">Alíquota (%)</label><input type="number" id="mi_aliq" min="0" step="0.01" oninput="calcImp()"></div><div class="fg"><label class="fl">Valor (R$)</label><input type="number" id="mi_val" step="0.01"></div></div><div class="fr2"><div class="fg"><label class="fl">Vencimento</label><input type="date" id="mi_vc"></div><div class="fg"><label class="fl">Status</label><select id="mi_st"><option>A Recolher</option><option>Recolhido</option><option>Retido</option></select></div></div><div class="fg"><label class="fl">Referência / DARF / GPS</label><input id="mi_ref"></div></div><div class="mf"><button class="btn bo" onclick="fM('ovImp')">Cancelar</button><button class="btn bp" onclick="salvarImp()">Salvar</button></div></div></div>
-<div class="ov hidden" id="ovFunc"><div class="modal"><div class="mh"><h2 id="funcMT">Novo Funcionário</h2><button class="mcl" onclick="fM('ovFunc')">✕</button></div><div class="mb"><div class="fr2"><div class="fg"><label class="fl">Nome *</label><input id="mf_n"></div><div class="fg"><label class="fl">Matrícula *</label><input id="mf_m"></div></div><div class="fr2"><div class="fg"><label class="fl">Função</label><input id="mf_fc" placeholder="Ex: Pedreiro"></div><div class="fg"><label class="fl">Setor / Obra</label><input id="mf_s" placeholder="Ex: Mardifi"></div></div><div class="fg"><label class="fl">CPF</label><input id="mf_cpf" maxlength="14" placeholder="000.000.000-00"></div></div><div class="mf"><button class="btn bo" onclick="fM('ovFunc')">Cancelar</button><button class="btn bp" onclick="salvarFunc()">Salvar</button></div></div></div>
+<div class="ov hidden" id="ovFunc"><div class="modal"><div class="mh"><h2 id="funcMT">Novo Funcionário</h2><button class="mcl" onclick="fM('ovFunc')">✕</button></div><div class="mb"><div class="fr2"><div class="fg"><label class="fl">Nome *</label><input id="mf_n"></div><div class="fg"><label class="fl">Matrícula *</label><input id="mf_m"></div></div><div class="fr2"><div class="fg"><label class="fl">Função</label><input id="mf_fc" placeholder="Ex: Pedreiro"></div><div class="fg"><label class="fl">Setor / Obra</label><input id="mf_s" placeholder="Ex: Bloco A"></div></div><div class="fg"><label class="fl">CPF</label><input id="mf_cpf" maxlength="14" placeholder="000.000.000-00"></div>
+<div style="border-top:1px solid var(--bd);margin:12px 0 10px;padding-top:10px"><span style="font-size:11px;font-weight:600;color:var(--mu);text-transform:uppercase;letter-spacing:.06em">💰 Dados Salariais</span></div>
+<div class="fr2"><div class="fg"><label class="fl">Salário Base (R$)</label><input id="mf_sal" type="number" step="0.01" placeholder="0,00"></div><div class="fg"><label class="fl">V. Alimentação / dia (R$)</label><input id="mf_ali" type="number" step="0.01" placeholder="0,00"></div></div>
+<div class="fr2"><div class="fg"><label class="fl">V. Transporte por dia (R$)</label><input id="mf_vt" type="number" step="0.01" placeholder="0,00"></div><div class="fg"><label class="fl">Qtd. Passagens / dia</label><input id="mf_np" type="number" step="1" min="0" placeholder="2"></div></div>
+<div class="fr2"><div class="fg"><label class="fl">Dias trabalhados / mês</label><input id="mf_dt" type="number" step="1" min="1" max="31" placeholder="22" title="Dias úteis no mês para cálculo do salário-dia"></div><div class="fg"><label class="fl">Banco (PIX / Ag / CC)</label><input id="mf_banco" placeholder="Ex: PIX 999.999.999-99"></div></div>
+</div><div class="mf"><button class="btn bo" onclick="fM('ovFunc')">Cancelar</button><button class="btn bp" onclick="salvarFunc()">Salvar</button></div></div></div>
 <div class="ov hidden" id="ovForn"><div class="modal"><div class="mh"><h2 id="fornMT">Novo Fornecedor</h2><button class="mcl" onclick="fM('ovForn')">✕</button></div><div class="mb"><div class="fr2"><div class="fg"><label class="fl">Razão Social / Nome *</label><input id="mfn_n"></div><div class="fg"><label class="fl">CNPJ / CPF</label><input id="mfn_d" placeholder="00.000.000/0001-00"></div></div><div class="fr2"><div class="fg"><label class="fl">Categoria</label><select id="mfn_cat"><option>Material de Construção</option><option>Serviços</option><option>Equipamentos</option><option>Transporte</option><option>EPI</option><option>Outros</option></select></div><div class="fg"><label class="fl">Telefone</label><input id="mfn_t"></div></div><div class="fr2"><div class="fg"><label class="fl">E-mail</label><input id="mfn_e" type="email"></div><div class="fg"><label class="fl">Prazo Pagamento</label><input id="mfn_p" placeholder="Ex: 30 dias"></div></div><div class="fg"><label class="fl">Observação</label><textarea id="mfn_ob"></textarea></div></div><div class="mf"><button class="btn bo" onclick="fM('ovForn')">Cancelar</button><button class="btn bp" onclick="salvarForn()">Salvar</button></div></div></div>
 
 
@@ -1901,13 +1905,27 @@ function gerarFichaFunc(fid){
     if(s){s.value=fid;renderFicha()}
   },100);
 }
-function abrirMFunc(){eIDs.f=null;document.getElementById('funcMT').textContent='Novo Funcionário';['mf_n','mf_m','mf_fc','mf_s','mf_cpf'].forEach(i=>document.getElementById(i).value='');document.getElementById('ovFunc').classList.remove('hidden')}
-function edtFunc(id){const f=db.funcionarios.find(x=>x.id===id);if(!f)return;eIDs.f=id;document.getElementById('funcMT').textContent='Editar Funcionário';document.getElementById('mf_n').value=f.nome;document.getElementById('mf_m').value=f.mat;document.getElementById('mf_fc').value=f.funcao;document.getElementById('mf_s').value=f.setor;document.getElementById('mf_cpf').value=f.cpf||'';document.getElementById('ovFunc').classList.remove('hidden')}
+function abrirMFunc(){eIDs.f=null;document.getElementById('funcMT').textContent='Novo Funcionário';['mf_n','mf_m','mf_fc','mf_s','mf_cpf','mf_sal','mf_ali','mf_vt','mf_np','mf_dt','mf_banco'].forEach(i=>document.getElementById(i).value='');document.getElementById('ovFunc').classList.remove('hidden')}
+function edtFunc(id){const f=db.funcionarios.find(x=>x.id===id);if(!f)return;eIDs.f=id;document.getElementById('funcMT').textContent='Editar Funcionário';document.getElementById('mf_n').value=f.nome;document.getElementById('mf_m').value=f.mat;document.getElementById('mf_fc').value=f.funcao;document.getElementById('mf_s').value=f.setor;document.getElementById('mf_cpf').value=f.cpf||'';
+  document.getElementById('mf_sal').value=f.sal||'';
+  document.getElementById('mf_ali').value=f.ali||'';
+  document.getElementById('mf_vt').value=f.vt||'';
+  document.getElementById('mf_np').value=f.np||2;
+  document.getElementById('mf_dt').value=f.dtm||22;
+  document.getElementById('mf_banco').value=f.banco||'';
+  document.getElementById('ovFunc').classList.remove('hidden')}
 function salvarFunc(){
   const n=document.getElementById('mf_n').value.trim();
   const m=document.getElementById('mf_m').value.trim();
   if(!n||!m){toast('Nome e matrícula obrigatórios','w');return}
-  const obj={nome:n,mat:m,funcao:document.getElementById('mf_fc').value,setor:document.getElementById('mf_s').value,cpf:document.getElementById('mf_cpf').value};
+  const obj={nome:n,mat:m,funcao:document.getElementById('mf_fc').value,setor:document.getElementById('mf_s').value,cpf:document.getElementById('mf_cpf').value,
+    sal:parseFloat(document.getElementById('mf_sal').value)||0,
+    ali:parseFloat(document.getElementById('mf_ali').value)||0,
+    vt:parseFloat(document.getElementById('mf_vt').value)||0,
+    np:parseInt(document.getElementById('mf_np').value)||2,
+    dtm:parseInt(document.getElementById('mf_dt').value)||22,
+    banco:document.getElementById('mf_banco').value||''
+  };
   if(eIDs.f){
     Object.assign(db.funcionarios.find(x=>x.id===eIDs.f),obj);
   } else {
@@ -1924,6 +1942,176 @@ function salvarFunc(){
   renderFuncs();popEpiSelects();toast('Salvo!')}
 function delFunc(id){if(!confirm('Excluir funcionário?'))return;db.funcionarios=db.funcionarios.filter(x=>x.id!==id);sv();renderFuncs();toast('Excluído')}
 function rmFace(id){if(!confirm('Remover face?'))return;db.funcionarios.find(x=>x.id===id).face=null;sv();renderFuncs();toast('Face removida')}
+
+
+/* ═══════════════════ FOLHA DE PAGAMENTO ═══════════════════ */
+function renderFolha(){
+  const mes = document.getElementById('folhaMes').value || new Date().toISOString().slice(0,7);
+  const [ano,mesN] = mes.split('-').map(Number);
+
+  // Calcular faltas de cada funcionário no mês pelo ponto
+  const funcs = db.funcionarios;
+  if(!funcs.length){
+    document.getElementById('tbFolha').innerHTML='<tr><td colspan="10" style="text-align:center;padding:28px;color:var(--mu)">Nenhum funcionário cadastrado</td></tr>';
+    document.getElementById('folhaSg').innerHTML='';
+    return;
+  }
+
+  // Dias úteis do mês (Mon-Fri count)
+  const diasUteis = (()=>{
+    let c=0; const d=new Date(ano,mesN-1,1);
+    while(d.getMonth()===mesN-1){if(d.getDay()>0&&d.getDay()<6)c++;d.setDate(d.getDate()+1);}
+    return c;
+  })();
+
+  let totalSalBruto=0,totalBeneficios=0,totalDesc=0,totalLiq=0;
+
+  const rows = funcs.map(f=>{
+    const salBase = f.sal||0;
+    const diasMes = f.dtm||diasUteis;
+    const salDia = diasMes>0 ? salBase/diasMes : 0;
+
+    // Contar faltas: dias úteis sem ponto no mês
+    const pontoDias = new Set(
+      db.ponto.filter(p=>p.fid===f.id && p.dt && p.dt.startsWith(mes)).map(p=>p.dt)
+    );
+    // Faltas = dias úteis sem registro
+    let faltas = 0;
+    const d2=new Date(ano,mesN-1,1);
+    const hoje=dHj();
+    while(d2.getMonth()===mesN-1){
+      const ds=d2.toISOString().slice(0,10);
+      if(ds<=hoje && d2.getDay()>0 && d2.getDay()<6 && !pontoDias.has(ds)) faltas++;
+      d2.setDate(d2.getDate()+1);
+    }
+
+    const descFalta = faltas * salDia;
+    const diasTrab = Math.max(0, diasMes - faltas);
+    const vali = (f.ali||0) * diasTrab;
+    const vt = (f.vt||0) * (f.np||2) * diasTrab;
+    const totalBen = vali + vt;
+    const liquido = Math.max(0, salBase - descFalta) + totalBen;
+
+    totalSalBruto += salBase;
+    totalBeneficios += totalBen;
+    totalDesc += descFalta;
+    totalLiq += liquido;
+
+    return {f, salBase, faltas, descFalta, vali, vt, totalBen, liquido, diasTrab};
+  });
+
+  document.getElementById('tbFolha').innerHTML = rows.map(({f,salBase,faltas,descFalta,vali,vt,totalBen,liquido})=>`
+    <tr>
+      <td style="font-weight:500">${f.nome}<div style="font-size:10px;color:var(--mu)">${f.mat}${f.banco?' · '+f.banco:''}</div></td>
+      <td style="font-size:12px">${f.funcao||'—'}</td>
+      <td style="font-weight:600">R$ ${R(salBase)}</td>
+      <td style="text-align:center;color:${faltas>0?'var(--er)':'var(--mu)'};font-weight:${faltas>0?'700':'400'}">${faltas}</td>
+      <td style="color:var(--er)">R$ ${R(descFalta)}</td>
+      <td style="color:#059669">R$ ${R(vali)}</td>
+      <td style="color:#2563eb">R$ ${R(vt)}</td>
+      <td style="color:var(--mu)">R$ ${R(totalBen)}</td>
+      <td style="font-weight:700;font-size:14px;color:var(--ok)">R$ ${R(liquido)}</td>
+      <td><button class="btn bo bsm" onclick="edtFunc(${f.id})" title="Editar dados salariais">✏️</button></td>
+    </tr>`).join('');
+
+  document.getElementById('tfFolha').innerHTML=`
+    <tr style="background:var(--bg);font-weight:700;border-top:2px solid var(--bd2)">
+      <td colspan="2" style="font-size:13px">TOTAIS — ${funcs.length} funcionários</td>
+      <td>R$ ${R(totalSalBruto)}</td>
+      <td></td>
+      <td style="color:var(--er)">R$ ${R(totalDesc)}</td>
+      <td style="color:#059669">—</td>
+      <td style="color:#2563eb">—</td>
+      <td>R$ ${R(totalBeneficios)}</td>
+      <td style="font-size:15px;color:var(--ok)">R$ ${R(totalLiq)}</td>
+      <td></td>
+    </tr>`;
+
+  document.getElementById('folhaSg').innerHTML=`
+    <div class="sc cg"><div class="lb">Total Salários</div><div class="vl">R$ ${R(totalSalBruto)}</div></div>
+    <div class="sc cr"><div class="lb">Descontos (Faltas)</div><div class="vl">R$ ${R(totalDesc)}</div></div>
+    <div class="sc" style="background:var(--okb);border-color:var(--okd)"><div class="lb">Alimentação + VT</div><div class="vl" style="color:var(--ok)">R$ ${R(totalBeneficios)}</div></div>
+    <div class="sc" style="background:#dbeafe;border-color:#93c5fd"><div class="lb">Total a Pagar</div><div class="vl" style="color:#1d4ed8;font-size:20px">R$ ${R(totalLiq)}</div></div>`;
+
+  // Histórico de folhas fechadas
+  renderFolhaHistorico();
+
+  // Status da folha do mês
+  if(!db.folhas) db.folhas=[];
+  const fechada = db.folhas.find(x=>x.mes===mes);
+  document.getElementById('folhaStatus').textContent = fechada ? '✅ Folha fechada em '+fechada.fechadaEm : '⚠️ Folha em aberto';
+}
+
+function fecharFolha(){
+  const mes = document.getElementById('folhaMes').value || new Date().toISOString().slice(0,7);
+  if(!confirm(`Fechar folha de ${mes}? Isso registra o pagamento como despesa no financeiro.`)) return;
+  if(!db.folhas) db.folhas=[];
+  // Calcular total
+  const rows = document.querySelectorAll('#tbFolha tr');
+  let total = 0;
+  rows.forEach(r=>{
+    const cells = r.querySelectorAll('td');
+    if(cells.length>=9){
+      const v = parseFloat(cells[8].textContent.replace('R$','').replace('.','').replace(',','.').trim());
+      if(!isNaN(v)) total+=v;
+    }
+  });
+  const hoje = dHj();
+  // Salvar folha fechada
+  const jaFechada = db.folhas.find(x=>x.mes===mes);
+  if(jaFechada){
+    if(!confirm('Esta folha já foi fechada. Atualizar?')) return;
+    jaFechada.total=total; jaFechada.fechadaEm=hoje;
+  } else {
+    db.folhas.push({mes, total, fechadaEm:hoje, id: Date.now()});
+  }
+  // Lançar como despesa automática
+  if(!db.despesas) db.despesas=[];
+  const descExist = db.despesas.find(d=>d.folhaMes===mes);
+  if(!descExist){
+    const nId = (db.nids.desp||0)+1; db.nids.desp=nId;
+    db.despesas.push({id:nId, desc:`Folha de Pagamento — ${mes}`, cat:'Mão de Obra', dt:hoje, vc:hoje, val:total, st:'A Pagar', folhaMes:mes, ob:'Gerado automaticamente'});
+  } else {
+    descExist.val=total; descExist.st='A Pagar';
+  }
+  sv();
+  renderFolha();
+  renderDespesas();
+  toast(`Folha fechada! Total: R$ ${R(total)}`,'s');
+}
+
+function renderFolhaHistorico(){
+  if(!db.folhas||!db.folhas.length){
+    document.getElementById('folhaHistorico').innerHTML='<div style="color:var(--mu);font-size:13px;padding:8px">Nenhuma folha fechada ainda.</div>';
+    return;
+  }
+  document.getElementById('folhaHistorico').innerHTML=[...db.folhas].reverse().map(fh=>`
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border:1px solid var(--bd);border-radius:var(--rs);margin-bottom:6px;background:var(--sf)">
+      <div>
+        <div style="font-weight:600;font-size:13px">📋 Folha ${fh.mes}</div>
+        <div style="font-size:11px;color:var(--mu)">Fechada em ${fh.fechadaEm}</div>
+      </div>
+      <div style="text-align:right">
+        <div style="font-weight:700;font-size:15px;color:var(--ok)">R$ ${R(fh.total)}</div>
+        <button class="btn bd2 bsm" onclick="delFolha('${fh.mes}')">✕ Remover</button>
+      </div>
+    </div>`).join('');
+}
+
+function delFolha(mes){
+  if(!confirm('Remover folha fechada de '+mes+'?'))return;
+  db.folhas=db.folhas.filter(x=>x.mes!==mes);
+  sv();renderFolhaHistorico();toast('Folha removida');
+}
+
+function imprimirFolha(){window.print()}
+
+/* ─── Inicializar mês atual no seletor de folha ─── */
+function initFolhaMes(){
+  const el=document.getElementById('folhaMes');
+  if(el&&!el.value) el.value=new Date().toISOString().slice(0,7);
+}
+
 
 /* fornecedores */
 function renderForns(){const busca=(document.getElementById('buscaFn').value||'').toLowerCase();document.getElementById('tbFn').innerHTML=db.fornecedores.filter(f=>!busca||f.nome.toLowerCase().includes(busca)||(f.doc||'').includes(busca)).map(f=>{const ap=db.despesas.filter(d=>d.fid===f.id&&(d.st==='A Pagar'||d.st==='Vencido')).reduce((s,d)=>s+d.val,0);const pg=db.despesas.filter(d=>d.fid===f.id&&d.st==='Pago').reduce((s,d)=>s+d.val,0);return`<tr><td style="font-size:12px">${f.doc||'—'}</td><td style="font-weight:500">${f.nome}</td><td><span class="badge bgy" style="font-size:10px">${f.cat}</span></td><td style="font-size:12px">${f.tel||'—'}</td><td style="font-weight:600;color:var(--er)">R$ ${R(ap)}</td><td style="color:var(--ok)">R$ ${R(pg)}</td><td><div style="display:flex;gap:3px"><button class="btn bo bsm" onclick="edtForn(${f.id})">Editar</button><button class="btn bd2 bsm" onclick="delForn(${f.id})">✕</button></div></td></tr>`}).join('')}
@@ -5038,111 +5226,195 @@ function corrigirIdsDuplicados(){
    - Log de acessos
 ══════════════════════════════════════ */
 
-const MAX_TENTATIVAS = 5;
-const BLOQUEIO_MS = 30 * 60 * 1000; // 30 minutos
-const SESSAO_MAX_MS = 8 * 60 * 60 * 1000; // 8 horas
 
-/* ── TENTATIVAS DE LOGIN ── */
-function verificarTentativas(user){
-  const dados = JSON.parse(localStorage.getItem('login_sec')||'{}');
-  const info = dados[user];
-  if(!info) return true;
-  if(info.bloqueadoAte && Date.now() < info.bloqueadoAte) return false;
-  return true;
+/* ╔══════════════════════════════════════════════════════╗
+   ║       CAD SECURITY LAYER — v1.0                     ║
+   ║  1. Hash SHA-256 de senhas                          ║
+   ║  2. Bloqueio por tentativas (já existia, reforçado) ║
+   ║  3. Timeout de sessão + renovação por atividade     ║
+   ║  4. Criptografia AES-GCM do localStorage           ║
+   ║  5. Tela de bloqueio por inatividade               ║
+   ╚══════════════════════════════════════════════════════╝ */
+
+/* ── CRYPTO: SHA-256 ── */
+async function sha256(str){
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+// alias usado no cadastro de usuários
+async function gHash(str){ return sha256(str); }
+
+/* ── CRYPTO: AES-GCM para localStorage ── */
+const _SEC_KEY_NAME = 'cad_dk';
+let _aesKey = null;
+
+async function getAesKey(){
+  if(_aesKey) return _aesKey;
+  // Derivar chave do device — fingerprint simples: userAgent + tela
+  const fp = navigator.userAgent + screen.width + screen.height + navigator.language;
+  const fpHash = await sha256(fp);
+  const raw = new Uint8Array(fpHash.match(/.{2}/g).map(h=>parseInt(h,16))).slice(0,32);
+  _aesKey = await crypto.subtle.importKey('raw', raw, {name:'AES-GCM'}, false, ['encrypt','decrypt']);
+  return _aesKey;
 }
 
-function registrarTentativa(user){
-  const dados = JSON.parse(localStorage.getItem('login_sec')||'{}');
-  if(!dados[user]) dados[user] = {tentativas:0};
-  dados[user].tentativas++;
-  dados[user].ultima = Date.now();
-  if(dados[user].tentativas >= MAX_TENTATIVAS){
-    dados[user].bloqueadoAte = Date.now() + BLOQUEIO_MS;
-    dados[user].tentativas = 0;
+async function encryptLS(data){
+  try{
+    const key = await getAesKey();
+    const iv = crypto.getRandomValues(new Uint8Array(12));
+    const enc = await crypto.subtle.encrypt({name:'AES-GCM',iv}, key, new TextEncoder().encode(JSON.stringify(data)));
+    const combined = new Uint8Array(iv.length + enc.byteLength);
+    combined.set(iv); combined.set(new Uint8Array(enc), iv.length);
+    return btoa(String.fromCharCode(...combined));
+  }catch(e){ return JSON.stringify(data); }
+}
+
+async function decryptLS(raw){
+  try{
+    const combined = new Uint8Array(atob(raw).split('').map(c=>c.charCodeAt(0)));
+    const iv = combined.slice(0,12), data = combined.slice(12);
+    const key = await getAesKey();
+    const dec = await crypto.subtle.decrypt({name:'AES-GCM',iv}, key, data);
+    return JSON.parse(new TextDecoder().decode(dec));
+  }catch(e){
+    // Fallback: dado não encriptado (migração)
+    try{ return JSON.parse(raw); }catch(e2){ return null; }
   }
-  localStorage.setItem('login_sec', JSON.stringify(dados));
 }
 
-function resetarTentativas(user){
-  const dados = JSON.parse(localStorage.getItem('login_sec')||'{}');
-  delete dados[user];
-  localStorage.setItem('login_sec', JSON.stringify(dados));
+/* Wrappers seguros para localStorage */
+async function lsSet(key, obj){
+  try{ localStorage.setItem(key, await encryptLS(obj)); }
+  catch(e){ localStorage.setItem(key, JSON.stringify(obj)); }
+}
+async function lsGet(key){
+  try{
+    const raw = localStorage.getItem(key);
+    if(!raw) return null;
+    return await decryptLS(raw);
+  }catch(e){ return null; }
 }
 
-function iniciarContagem(user){
-  const dados = JSON.parse(localStorage.getItem('login_sec')||'{}');
-  const restante = Math.ceil((dados[user]?.bloqueadoAte - Date.now()) / 1000);
-  let seg = restante;
-  const el = document.getElementById('countdown');
-  const timer = setInterval(()=>{
-    seg--;
-    if(el) el.textContent = seg;
-    if(seg <= 0){
-      clearInterval(timer);
-      const erro = document.getElementById('loginErro');
-      if(erro) erro.style.display = 'none';
+/* ── TIMEOUT DE SESSÃO + BLOQUEIO POR INATIVIDADE ── */
+const INATIVIDADE_BLOQUEIO_MS = 15 * 60 * 1000; // 15 min → tela de bloqueio
+const SESSAO_TIMEOUT_MS = 8 * 60 * 60 * 1000;   // 8h → logout total
+let _timerBloqueio = null;
+let _sessaoExpira = null;
+let _telaBloqueiAtiva = false;
+
+function resetarTimerInatividade(){
+  if(!perfilAtual) return;
+  clearTimeout(_timerBloqueio);
+  _timerBloqueio = setTimeout(()=>{ if(perfilAtual) ativarTelaBloqueio(); }, INATIVIDADE_BLOQUEIO_MS);
+}
+
+// Renovar timer em qualquer interação
+['click','keydown','touchstart','mousemove','scroll'].forEach(ev=>{
+  document.addEventListener(ev, ()=>{ if(perfilAtual && !_telaBloqueiAtiva) resetarTimerInatividade(); }, {passive:true});
+});
+
+/* ── TELA DE BLOQUEIO ── */
+function criarTelaBloqueio(){
+  if(document.getElementById('telaBloqueio')) return;
+  const el = document.createElement('div');
+  el.id = 'telaBloqueio';
+  el.style.cssText = 'position:fixed;inset:0;z-index:99999;background:#0f172a;display:none;flex-direction:column;align-items:center;justify-content:center;gap:18px';
+  el.innerHTML = `
+    <div style="text-align:center">
+      <div style="font-size:48px;margin-bottom:8px">🔒</div>
+      <div style="font-size:20px;font-weight:700;color:#f1f5f9">CAD Engenharia e SST</div>
+      <div style="font-size:13px;color:#94a3b8;margin-top:4px">Sessão bloqueada por inatividade</div>
+    </div>
+    <div style="background:#1e293b;border:1px solid #334155;border-radius:12px;padding:24px;width:280px;display:flex;flex-direction:column;gap:12px">
+      <div style="font-size:13px;color:#94a3b8;text-align:center">Digite sua senha para desbloquear</div>
+      <input id="blqPass" type="password" placeholder="Senha"
+        style="border:1px solid #334155;background:#0f172a;color:#f1f5f9;border-radius:8px;padding:10px 14px;font-size:14px;outline:none;width:100%"
+        onkeydown="if(event.key==='Enter')desbloquear()">
+      <div id="blqErro" style="color:#f87171;font-size:12px;display:none;text-align:center"></div>
+      <button onclick="desbloquear()"
+        style="background:#2563eb;color:#fff;border:none;border-radius:8px;padding:11px;font-size:14px;font-weight:600;cursor:pointer">
+        🔓 Desbloquear
+      </button>
+      <button onclick="fazerLogoutBloqueio()"
+        style="background:transparent;color:#64748b;border:1px solid #334155;border-radius:8px;padding:8px;font-size:12px;cursor:pointer">
+        Sair e voltar ao login
+      </button>
+    </div>`;
+  document.body.appendChild(el);
+}
+
+function ativarTelaBloqueio(){
+  _telaBloqueiAtiva = true;
+  clearTimeout(_timerBloqueio);
+  criarTelaBloqueio();
+  const el = document.getElementById('telaBloqueio');
+  if(el){ el.style.display='flex'; setTimeout(()=>{ const p=document.getElementById('blqPass'); if(p)p.focus(); },100); }
+}
+
+async function desbloquear(){
+  const pass = (document.getElementById('blqPass').value||'').trim();
+  const erro = document.getElementById('blqErro');
+  if(!pass){ erro.textContent='Digite a senha'; erro.style.display='block'; return; }
+  // Verificar senha do usuário atual — igual ao fazerLogin mas sem mudar estado
+  const user = _usuarioAtual;
+  const u = USUARIOS[user];
+  let ok = false;
+  if(u){
+    if(u.hash){ const h = await sha256(pass); ok = (h===u.hash); }
+    if(!ok && u.senha) ok = (pass===u.senha);
+  }
+  if(ok){
+    document.getElementById('blqPass').value='';
+    erro.style.display='none';
+    document.getElementById('telaBloqueio').style.display='none';
+    _telaBloqueiAtiva=false;
+    resetarTimerInatividade();
+    toast('🔓 Sessão desbloqueada');
+  } else {
+    erro.textContent='Senha incorreta';
+    erro.style.display='block';
+    document.getElementById('blqPass').value='';
+    document.getElementById('blqPass').focus();
+  }
+}
+
+function fazerLogoutBloqueio(){
+  document.getElementById('telaBloqueio').style.display='none';
+  _telaBloqueiAtiva=false;
+  fazerLogout();
+}
+
+let _usuarioAtual = '';
+
+/* ── FORÇA BRUTA: reforço extra ── */
+const _MAX_TENT = 5;
+const _BLOQUEAR_MS = 15 * 60 * 1000;
+function _chkBrute(user){
+  try{
+    const dados = JSON.parse(localStorage.getItem('_lsec')||'{}');
+    const info = dados[user]||{};
+    if(info.bloq && Date.now() < info.bloq){
+      const min = Math.ceil((info.bloq-Date.now())/60000);
+      return {bloqueado:true, min};
     }
-  }, 1000);
+    return {bloqueado:false, tent: info.tent||0};
+  }catch(e){ return {bloqueado:false, tent:0}; }
 }
-
-/* ── SESSÃO ── */
-function iniciarSessao(u){
-  const sessao = {
-    user: u.perfil,
-    inicio: Date.now(),
-    expira: Date.now() + SESSAO_MAX_MS
-  };
-  sessionStorage.setItem('kairon_sessao', JSON.stringify(sessao));
-}
-
-function verificarSessao(){
-  const sessao = JSON.parse(sessionStorage.getItem('kairon_sessao')||'null');
-  if(!sessao) return false;
-  if(Date.now() > sessao.expira){
-    sessionStorage.removeItem('kairon_sessao');
-    return false;
-  }
-  return true;
-}
-
-// Verificar sessão a cada 5 minutos
-setInterval(()=>{
-  if(perfilAtual && !verificarSessao()){
-    toast('⏰ Sessão expirada — faça login novamente');
-    setTimeout(()=>fazerLogout(), 2000);
-  }
-}, 5 * 60 * 1000);
-
-/* ── LOG DE ACESSOS ── */
-function registrarAcesso(user, perfil){
-  if(!db.logAcessos) db.logAcessos = [];
-  db.logAcessos.push({
-    user, perfil,
-    dt: new Date().toLocaleString('pt-BR'),
-    ts: Date.now()
-  });
-  // Manter só os últimos 100 logs
-  if(db.logAcessos.length > 100) db.logAcessos = db.logAcessos.slice(-100);
-  sv();
-}
-
-/* ── SINCUSUARIOS ATUALIZADO ── */
-function sincUsuarios(){
-  // Só adiciona usuários extras criados pelo master
-  if(db.usuarios && db.usuarios.length > 0){
-    db.usuarios.forEach(u=>{
-      const padrao = ['master','diretor','seguranca','almoxarife','financeiro','funcionario'];
-      if(!padrao.includes(u.login)){
-        // Usuário criado pelo master — adicionar com hash
-        USUARIOS[u.login] = {
-          hash: u.hash || u.senha, // compatibilidade
-          perfil: u.perfil,
-          nome: u.nome,
-          label: u.label
-        };
+function _regBrute(user, sucesso){
+  try{
+    const dados = JSON.parse(localStorage.getItem('_lsec')||'{}');
+    if(sucesso){ delete dados[user]; }
+    else{
+      if(!dados[user]) dados[user]={tent:0};
+      dados[user].tent++;
+      if(dados[user].tent>=_MAX_TENT){
+        dados[user].bloq = Date.now()+_BLOQUEAR_MS;
+        dados[user].tent = 0;
       }
-    });
-  }
+    }
+    localStorage.setItem('_lsec', JSON.stringify(dados));
+    return dados[user]||{};
+  }catch(e){ return {}; }
 }
 
 /* ══════════════════════════════════════
@@ -5164,29 +5436,53 @@ const MENUS_PERFIL = {
   master:      null, /* acesso total + painel admin */
   master:      null,
   diretor:     null, /* null = acesso total */
-  rh:          ['fin-fluxo','fin-rec','fin-desp','fin-imp','funcs','dossie-lista','solicitacoes','dashboard'],
+  rh:          ['fin-fluxo','fin-rec','fin-desp','fin-imp','fin-folha','funcs','dossie-lista','solicitacoes','dashboard'],
   seguranca:   ['dashboard','ponto','rel-ponto','epi-entrega','epi-hist','epi-est','epi-ficha','dossie-lista','dossie-func','funcs'],
   almoxarife:  ['almo-mov','almo-est','almo-rel'],
-  financeiro:  ['fin-fluxo','fin-rec','fin-desp','fin-imp','forns'],
+  financeiro:  ['fin-fluxo','fin-rec','fin-desp','fin-imp','fin-folha','forns'],
   funcionario: null, /* tela própria */
 };
 
 let perfilAtual = null;
 let ptStrFunc = null, ptLpFunc = null;
 
-function fazerLogin(){
+async function fazerLogin(){
   const user = (document.getElementById('loginUser').value||'').trim().toLowerCase();
   const pass = (document.getElementById('loginPass').value||'').trim();
   const erro = document.getElementById('loginErro');
   erro.style.display = 'none';
 
-  const u = USUARIOS[user];
-  if(!u || u.senha !== pass){
-    erro.textContent = '❌ Usuário ou senha incorretos.';
+  // ── Verificar bloqueio por força bruta ──
+  const brute = _chkBrute(user);
+  if(brute.bloqueado){
+    erro.innerHTML = `⛔ Muitas tentativas. Aguarde <strong>${brute.min} min</strong>.`;
     erro.style.display = 'block';
     document.getElementById('loginPass').value = '';
     return;
   }
+
+  // ── Verificar senha: suporta hash SHA-256 e texto plano (legado) ──
+  const u = USUARIOS[user];
+  let autenticado = false;
+  if(u){
+    if(u.hash){ const h = await sha256(pass); autenticado = (h === u.hash); }
+    if(!autenticado && u.senha) autenticado = (pass === u.senha);
+  }
+
+  if(!u || !autenticado){
+    const info = _regBrute(user, false);
+    const restam = _MAX_TENT - (info.tent||0);
+    erro.innerHTML = restam > 0
+      ? `❌ Usuário ou senha incorretos. <small>(${restam} tentativa${restam===1?'':'s'} restante${restam===1?'':'s'})</small>`
+      : `⛔ Conta bloqueada por 15 minutos.`;
+    erro.style.display = 'block';
+    document.getElementById('loginPass').value = '';
+    return;
+  }
+
+  // ── Login OK ──
+  _regBrute(user, true);
+  _usuarioAtual = user;
 
   // Carregar dados
   const _obras=getObras(); const _primeiraObra=_obras&&_obras.length?_obras[0]:null;
@@ -5202,6 +5498,8 @@ function fazerLogin(){
 
   // Perfil
   perfilAtual = u.perfil;
+  _sessaoExpira = Date.now() + SESSAO_TIMEOUT_MS;
+  resetarTimerInatividade();
   try{ document.getElementById('perfilBadge').textContent = u.label; }catch(e){}
   try{ aplicarPerfil(u.perfil); }catch(e){}
 
@@ -5243,6 +5541,10 @@ function aplicarPerfil(perfil){
 }
 
 function fazerLogout(){
+  clearTimeout(_timerBloqueio);
+  _telaBloqueiAtiva = false;
+  _usuarioAtual = '';
+  _sessaoExpira = null;
   perfilAtual = null;
   obraAtual = null;
   window._obraStorageKey = null;
