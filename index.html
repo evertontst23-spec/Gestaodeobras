@@ -669,20 +669,13 @@ textarea{resize:vertical;min-height:60px;line-height:1.6}
       </div>
       <button onclick="fecharNavDrawer()" style="background:none;border:none;color:var(--sb-tx);font-size:22px;cursor:pointer;padding:4px 8px">✕</button>
     </div>
-    <!-- OBRAS NO DRAWER -->
+    <!-- OBRAS NO DRAWER — dinâmico -->
     <div style="padding:10px 10px 6px;border-bottom:1px solid var(--sb-bd)">
-      <div style="font-size:9px;font-weight:700;color:#3d5a80;letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px">Obra Ativa</div>
-      <div style="display:flex;flex-direction:column;gap:4px">
-        <button type="button" onclick="trocarObra('vila_brasil');fecharNavDrawer()" style="display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:7px;border:1.5px solid #2563eb;background:rgba(37,99,235,.15);cursor:pointer;font-family:inherit;text-align:left;width:100%">
-          <span style="font-size:16px">🏗️</span><span style="font-size:12px;font-weight:700;color:#93c5fd">Vila Brasil</span>
-        </button>
-        <button type="button" onclick="trocarObra('vila_motorista');fecharNavDrawer()" style="display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:7px;border:1.5px solid transparent;background:transparent;cursor:pointer;font-family:inherit;text-align:left;width:100%">
-          <span style="font-size:16px">🏛️</span><span style="font-size:12px;font-weight:500;color:#4a6fa5">Praça da Bandeira</span>
-        </button>
-        <button type="button" onclick="trocarObra('campo_cafe');fecharNavDrawer()" style="display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:7px;border:1.5px solid transparent;background:transparent;cursor:pointer;font-family:inherit;text-align:left;width:100%">
-          <span style="font-size:16px">☕</span><span style="font-size:12px;font-weight:500;color:#4a6fa5">Campo do Café</span>
-        </button>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+        <div style="font-size:9px;font-weight:700;color:#3d5a80;letter-spacing:.1em;text-transform:uppercase">Obra Ativa</div>
+        <button onclick="abrirModalNovaObra()" style="background:rgba(79,110,247,.18);border:1px solid rgba(79,110,247,.35);color:#7b96f9;border-radius:5px;width:20px;height:20px;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0">+</button>
       </div>
+      <div style="display:flex;flex-direction:column;gap:3px" id="obrasDrawer"></div>
     </div>
     <!-- MENU COMPLETO NO DRAWER -->
     <nav style="padding:6px">
@@ -763,26 +756,13 @@ textarea{resize:vertical;min-height:60px;line-height:1.6}
   <div class="sb-client-label">Cliente Ativo</div>
   <div class="sb-client-name" id="sbClientName">Construtora FJ</div>
 </div>
-<!-- SELETOR DE OBRA NA SIDEBAR -->
+<!-- SELETOR DE OBRA NA SIDEBAR — dinâmico -->
 <div style="padding:10px 10px 6px;border-bottom:1px solid var(--sb-bd)">
-  <div style="font-size:9px;font-weight:700;color:#3d5a80;letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px">Obra Ativa</div>
-  <div style="display:flex;flex-direction:column;gap:4px" id="obrasSidebar">
-    <button type="button" onclick="trocarObra('vila_brasil')" id="sbobra-vila_brasil"
-      style="display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:7px;border:1.5px solid #2563eb;background:rgba(37,99,235,.15);cursor:pointer;font-family:inherit;text-align:left;width:100%">
-      <span style="font-size:14px">🏗️</span>
-      <span style="font-size:11px;font-weight:700;color:#93c5fd">Vila Brasil</span>
-    </button>
-    <button type="button" onclick="trocarObra('vila_motorista')" id="sbobra-vila_motorista"
-      style="display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:7px;border:1.5px solid transparent;background:transparent;cursor:pointer;font-family:inherit;text-align:left;width:100%">
-      <span style="font-size:14px">🏛️</span>
-      <span style="font-size:11px;font-weight:500;color:#4a6fa5">Praça da Bandeira</span>
-    </button>
-    <button type="button" onclick="trocarObra('campo_cafe')" id="sbobra-campo_cafe"
-      style="display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:7px;border:1.5px solid transparent;background:transparent;cursor:pointer;font-family:inherit;text-align:left;width:100%">
-      <span style="font-size:14px">☕</span>
-      <span style="font-size:11px;font-weight:500;color:#4a6fa5">Campo do Café</span>
-    </button>
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+    <div style="font-size:9px;font-weight:700;color:#3d5a80;letter-spacing:.1em;text-transform:uppercase">Obra Ativa</div>
+    <button onclick="abrirModalNovaObra()" title="Nova Obra" style="background:rgba(79,110,247,.18);border:1px solid rgba(79,110,247,.35);color:#7b96f9;border-radius:5px;width:20px;height:20px;font-size:13px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;flex-shrink:0">+</button>
   </div>
+  <div style="display:flex;flex-direction:column;gap:3px;max-height:220px;overflow-y:auto" id="obrasSidebar"></div>
 </div>
 <nav class="sb-nav">
     <div class="ns">Geral</div>
@@ -1095,6 +1075,55 @@ textarea{resize:vertical;min-height:60px;line-height:1.6}
 
 
 
+<!-- ════ MODAL NOVA / EDITAR OBRA ════ -->
+<div class="ov hidden" id="ovObra">
+  <div class="modal" style="max-width:500px">
+    <div class="mh">
+      <h2 id="obraMT">Nova Obra</h2>
+      <button class="mcl" onclick="fM('ovObra')">✕</button>
+    </div>
+    <div class="mb">
+      <div class="fg">
+        <label class="fl">Nome da Obra *</label>
+        <input id="ob_nome" placeholder="Ex: Urbanização Vila Brasil">
+      </div>
+      <div class="fg">
+        <label class="fl">Nome Curto *</label>
+        <input id="ob_curto" placeholder="Ex: Vila Brasil" maxlength="30">
+      </div>
+      <div class="fr2">
+        <div class="fg">
+          <label class="fl">Empresa / Cliente *</label>
+          <input id="ob_empresa" placeholder="Ex: Construtora Mardifi Ltda">
+        </div>
+        <div class="fg">
+          <label class="fl">Programa / Contrato</label>
+          <input id="ob_programa" placeholder="Ex: ProMorar · Prefeitura">
+        </div>
+      </div>
+      <div class="fr2">
+        <div class="fg">
+          <label class="fl">Ícone (emoji)</label>
+          <input id="ob_icone" placeholder="🏗️" maxlength="4" style="font-size:20px;text-align:center">
+        </div>
+        <div class="fg">
+          <label class="fl">Cor de Destaque</label>
+          <input type="color" id="ob_cor" value="#4f6ef7" style="height:40px;padding:2px 6px;cursor:pointer">
+        </div>
+      </div>
+      <div class="fg">
+        <label class="fl">Endereço / Localização</label>
+        <input id="ob_end" placeholder="Ex: Rua das Flores, 100 — Recife, PE">
+      </div>
+    </div>
+    <div class="mf">
+      <button class="btn bo" onclick="fM('ovObra')">Cancelar</button>
+      <button class="btn bd2 bsm" id="btnExcluirObra" onclick="excluirObraAtual()" style="display:none;margin-right:auto">🗑️ Excluir</button>
+      <button class="btn bp" onclick="salvarObra()">Salvar Obra</button>
+    </div>
+  </div>
+</div>
+
 <!-- ════ MODAL PAINEL MASTER ════ -->
 <div class="ov hidden" id="ovMaster">
   <div class="modal" style="max-width:700px;max-height:92vh">
@@ -1119,7 +1148,10 @@ textarea{resize:vertical;min-height:60px;line-height:1.6}
 
       <!-- ABA OBRAS -->
       <div id="abaM-obras" style="padding:18px">
-        <h3 style="margin-bottom:14px">Visão Geral — Todas as Obras Mardifi</h3>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+          <h3>Gerenciar Obras</h3>
+          <button class="btn bp bsm" onclick="abrirModalNovaObra()">+ Nova Obra</button>
+        </div>
         <div id="paineObrasCont"></div>
       </div>
 
@@ -4424,29 +4456,54 @@ function mostrarStatusSync(ok){
    SISTEMA MULTI-OBRA — MARDIFI
 ══════════════════════════════════════ */
 
-const OBRAS = {
-  vila_brasil:    { id:'vila_brasil',    nome:'Urbanização Vila Brasil', nome_curto:'Vila Brasil',        empresa:'Construtora Mardifi Ltda', programa:'ProMorar · Prefeitura do Recife', icone:'🏗️', cor:'#2563eb', sk:'kb_vb' },
-  vila_motorista: { id:'vila_motorista', nome:'Praça da Bandeira',       nome_curto:'Praça da Bandeira',  empresa:'Construtora Mardifi Ltda', programa:'Prefeitura do Recife',           icone:'🏛️', cor:'#059669', sk:'kb_vm' },
-  campo_cafe:     { id:'campo_cafe',     nome:'Campo do Café',           nome_curto:'Campo do Café',      empresa:'Construtora Mardifi Ltda', programa:'Prefeitura do Recife',           icone:'☕', cor:'#d97706', sk:'kb_cc' }
-};
+/* ── OBRAS DINÂMICAS ─────────────────────────────────────────── */
+// Obras são salvas em localStorage na chave 'cad_obras'
+// Cada obra: { id, nome, nome_curto, empresa, programa, icone, cor, end, sk }
+
+function carregarListaObras(){
+  try{
+    const raw = localStorage.getItem('cad_obras');
+    if(raw) return JSON.parse(raw);
+  }catch(e){}
+  // Obras padrão para não quebrar dados existentes
+  return [
+    { id:'vila_brasil',    nome:'Urbanização Vila Brasil', nome_curto:'Vila Brasil',       empresa:'Construtora Mardifi Ltda', programa:'ProMorar · Prefeitura do Recife', icone:'🏗️', cor:'#2563eb', end:'', sk:'kb_vb' },
+    { id:'vila_motorista', nome:'Praça da Bandeira',       nome_curto:'Praça da Bandeira', empresa:'Construtora Mardifi Ltda', programa:'Prefeitura do Recife',           icone:'🏛️', cor:'#059669', end:'', sk:'kb_vm' },
+    { id:'campo_cafe',     nome:'Campo do Café',           nome_curto:'Campo do Café',     empresa:'Construtora Mardifi Ltda', programa:'Prefeitura do Recife',           icone:'☕', cor:'#d97706', end:'', sk:'kb_cc' }
+  ];
+}
+
+function salvarListaObras(lista){
+  localStorage.setItem('cad_obras', JSON.stringify(lista));
+}
+
+function getObras(){ return carregarListaObras(); }
+function getObra(id){ return getObras().find(o=>o.id===id); }
+
+// Compatibilidade: objeto OBRAS como proxy dinâmico
+const OBRAS = new Proxy({}, {
+  get(_, id){ return getObra(id); },
+  ownKeys(){ return getObras().map(o=>o.id); },
+  has(_, id){ return !!getObra(id); },
+  getOwnPropertyDescriptor(){ return {enumerable:true,configurable:true}; }
+});
 
 let obraAtual = null;
+let _editandoObraId = null; // para o modal de edição
 
 /* Selecionar obra no login */
 function selecionarObra(id){
-  // Visual — desselecionar todas
-  Object.keys(OBRAS).forEach(k=>{
-    const el = document.getElementById('obra-'+k);
+  getObras().forEach(ob=>{
+    const el = document.getElementById('obra-'+ob.id);
     if(!el) return;
     el.style.border = '2px solid #e2e8f0';
     el.style.background = '#fff';
     const label = el.querySelector('div:last-child');
     if(label) label.style.color = '#64748b';
   });
-  // Selecionar a escolhida
   const el = document.getElementById('obra-'+id);
-  const ob = OBRAS[id];
-  if(el){
+  const ob = getObra(id);
+  if(el && ob){
     el.style.border = '2px solid '+ob.cor;
     el.style.background = ob.cor+'18';
     const label = el.querySelector('div:last-child');
@@ -4458,7 +4515,7 @@ function selecionarObra(id){
 
 /* Carregar dados da obra selecionada */
 function carregarObra(id){
-  const ob = OBRAS[id];
+  const ob = getObra(id);
   if(!ob) return;
   obraAtual = ob;
 
@@ -4590,34 +4647,42 @@ function confirmarTrocarObra(){
 
 /* Painel Master — visão geral de todas as obras */
 function verTodasObras(){
-  let html = '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:16px">';
-  Object.values(OBRAS).forEach(ob=>{
-    const dados = localStorage.getItem(ob.storage_key);
+  const obras = getObras();
+  let html = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin-bottom:16px">';
+  obras.forEach(ob=>{
+    const dados = localStorage.getItem('kairon_'+ob.id);
     const d = dados ? JSON.parse(dados) : null;
-    const funcs = d ? d.funcionarios.length : 0;
-    const epiE = d ? d.entregas.filter(e=>e.st==='Entregue').length : 0;
+    const funcs = d ? (d.funcionarios||[]).length : 0;
+    const epiE = d ? (d.entregas||[]).filter(e=>e.st==='Entregue').length : 0;
     const rdos = d ? (d.rdos||[]).length : 0;
-    html += `<div style="border:2px solid ${ob.cor}20;border-radius:10px;padding:14px;background:${ob.cor}08">
+    const ativa = obraAtual && obraAtual.id === ob.id;
+    html += `<div style="border:2px solid ${ob.cor}30;border-radius:10px;padding:14px;background:${ob.cor}08;position:relative">
+      ${ativa?'<span style="position:absolute;top:8px;right:8px;font-size:9px;background:'+ob.cor+';color:#fff;padding:2px 7px;border-radius:10px;font-weight:700">ATIVA</span>':''}
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
-        <span style="font-size:20px">${ob.icone}</span>
+        <span style="font-size:20px">${ob.icone||'🏗️'}</span>
         <div><div style="font-size:13px;font-weight:700;color:${ob.cor}">${ob.nome_curto}</div><div style="font-size:11px;color:var(--mu)">${ob.empresa}</div></div>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:11px">
         <div style="background:var(--bg);border-radius:6px;padding:7px;text-align:center"><div style="font-weight:700;font-size:16px;color:var(--tx)">${funcs}</div><div style="color:var(--mu)">Funcionários</div></div>
         <div style="background:var(--bg);border-radius:6px;padding:7px;text-align:center"><div style="font-weight:700;font-size:16px;color:var(--tx)">${epiE}</div><div style="color:var(--mu)">EPIs Ativos</div></div>
         <div style="background:var(--bg);border-radius:6px;padding:7px;text-align:center"><div style="font-weight:700;font-size:16px;color:var(--tx)">${rdos}</div><div style="color:var(--mu)">RDOs</div></div>
-        <div style="background:var(--bg);border-radius:6px;padding:7px;text-align:center"><div style="font-weight:700;font-size:16px;color:${dados?'var(--ok)':'var(--er)'}">${dados?'Ativo':'Vazio'}</div><div style="color:var(--mu)">Status</div></div>
+        <div style="background:var(--bg);border-radius:6px;padding:7px;text-align:center"><div style="font-weight:700;font-size:16px;color:${dados?'var(--ok)':\'var(--er)\'}">\${dados?'Ativo':'Vazio'}</div><div style="color:var(--mu)">Status</div></div>
       </div>
-      ${dados?`<button class="btn bp bsm" style="width:100%;margin-top:8px;font-size:11px" onclick="exportarObra('${ob.id}')">💾 Backup ${ob.nome_curto}</button>`:''}
+      <div style="display:flex;gap:6px;margin-top:8px">
+        <button class="btn bo" style="flex:1;font-size:11px" onclick="abrirModalEditarObra('${ob.id}')">✏️ Editar</button>
+        ${dados?`<button class="btn bp bsm" style="flex:1;font-size:11px" onclick="exportarObra('${ob.id}')">💾 Backup</button>`:''}
+      </div>
     </div>`;
   });
   html += '</div>';
+  html += '<button class="btn bp" style="margin-top:4px" onclick="abrirModalNovaObra()">+ Nova Obra</button>';
   return html;
 }
 
 function exportarObra(id){
-  const ob = OBRAS[id];
-  const dados = localStorage.getItem(ob.storage_key);
+  const ob = getObra(id);
+  if(!ob){toast('Obra não encontrada','w');return}
+  const dados = localStorage.getItem('kairon_'+ob.id);
   if(!dados){toast('Nenhum dado para exportar','w');return}
   const b = new Blob([dados],{type:'application/json'});
   const a = document.createElement('a');
@@ -4662,43 +4727,147 @@ async function verificarEPopularSupa(obraId){
 /* ── TROCAR OBRA SEM FAZER LOGOUT ── */
 function trocarObra(id){
   if(obraAtual && obraAtual.id===id) return;
-  if(!confirm('Trocar para '+OBRAS[id].nome+'?')) return;
+  const ob = getObra(id);
+  if(!ob) return;
+  if(!confirm('Trocar para '+ob.nome+'?')) return;
   sv(); // salvar obra atual
   carregarObra(id);
   sincUsuarios();
-  atualizarSeletorSidebar(id);
+  renderObrasSidebar(id);
   renderDash();popEpiSelects();updBdgEpi();updBdgAlmo();updBdgSol();
   nav('dashboard');
-  toast('✅ '+OBRAS[id].nome);
+  toast('✅ '+ob.nome);
 }
-function atualizarSeletorSidebar(idAtivo){
-  Object.keys(OBRAS).forEach(k=>{
-    const btn = document.getElementById('sbobra-'+k);
-    if(!btn) return;
-    const ob = OBRAS[k];
-    const ativo = k === idAtivo;
-    
-    if(ativo){
-      btn.style.border = '1.5px solid '+ob.cor;
-      btn.style.background = 'rgba('+hexToRgb(ob.cor)+', .15)';
-      const lbl = btn.querySelector('span:nth-child(2)');
-      if(lbl){ lbl.style.color = '#93c5fd'; lbl.style.fontWeight = '700'; }
-      // Remover badges duplicados antes de adicionar
-      btn.querySelectorAll('.obra-badge').forEach(b=>b.remove());
-      const badge = document.createElement('span');
-      badge.className = 'obra-badge';
-      badge.style.cssText = 'margin-left:auto;font-size:9px;background:'+ob.cor+';color:#fff;padding:1px 6px;border-radius:10px;font-weight:700;flex-shrink:0';
-      btn.appendChild(badge);
-      badge.textContent = 'ATIVA';
-    } else {
-      btn.style.border = '1.5px solid transparent';
-      btn.style.background = 'transparent';
-      btn.querySelector('span:nth-child(2)').style.color = '#4a6fa5';
-      btn.querySelector('span:nth-child(2)').style.fontWeight = '500';
-      const badge = btn.querySelector('.obra-badge');
-      if(badge) badge.remove();
+function atualizarSeletorSidebar(idAtivo){ renderObrasSidebar(idAtivo); }
+
+function renderObrasSidebar(idAtivo){
+  const obras = getObras();
+  const ativo = idAtivo || (obraAtual && obraAtual.id);
+  const makeItem = (ob) => {
+    const isAtivo = ob.id === ativo;
+    return `<button id="sbobra-${ob.id}" onclick="trocarObra('${ob.id}')" style="
+      display:flex;align-items:center;gap:8px;width:100%;border:1.5px solid ${isAtivo?ob.cor:'transparent'};
+      background:${isAtivo?'rgba('+hexToRgb(ob.cor)+',.15)':'transparent'};
+      border-radius:7px;padding:7px 8px;cursor:pointer;text-align:left;transition:background .15s">
+      <span style="font-size:16px;flex-shrink:0">${ob.icone||'🏗️'}</span>
+      <span style="font-size:12px;font-weight:${isAtivo?'700':'500'};color:${isAtivo?'#93c5fd':'#4a6fa5'};line-height:1.2;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${ob.nome_curto}</span>
+      ${isAtivo?`<span class="obra-badge" style="margin-left:auto;font-size:9px;background:${ob.cor};color:#fff;padding:1px 6px;border-radius:10px;font-weight:700;flex-shrink:0">ATIVA</span>`:''}
+    </button>`;
+  };
+  const html = obras.map(makeItem).join('');
+  const sidebar = document.getElementById('obrasSidebar');
+  const drawer = document.getElementById('obrasDrawer');
+  if(sidebar) sidebar.innerHTML = html;
+  if(drawer) drawer.innerHTML = html;
+}
+
+
+/* ══════════════════════════════════════
+   GESTÃO DE OBRAS — CRUD COMPLETO
+══════════════════════════════════════ */
+function abrirModalNovaObra(){
+  _editandoObraId = null;
+  document.getElementById('obraMT').textContent = 'Nova Obra';
+  document.getElementById('ob_nome').value = '';
+  document.getElementById('ob_curto').value = '';
+  document.getElementById('ob_empresa').value = '';
+  document.getElementById('ob_programa').value = '';
+  document.getElementById('ob_icone').value = '🏗️';
+  document.getElementById('ob_cor').value = '#4f6ef7';
+  document.getElementById('ob_end').value = '';
+  document.getElementById('btnExcluirObra').style.display = 'none';
+  document.getElementById('ovObra').classList.remove('hidden');
+}
+
+function abrirModalEditarObra(id){
+  const ob = getObra(id);
+  if(!ob) return;
+  _editandoObraId = id;
+  document.getElementById('obraMT').textContent = 'Editar Obra';
+  document.getElementById('ob_nome').value = ob.nome || '';
+  document.getElementById('ob_curto').value = ob.nome_curto || '';
+  document.getElementById('ob_empresa').value = ob.empresa || '';
+  document.getElementById('ob_programa').value = ob.programa || '';
+  document.getElementById('ob_icone').value = ob.icone || '🏗️';
+  document.getElementById('ob_cor').value = ob.cor || '#4f6ef7';
+  document.getElementById('ob_end').value = ob.end || '';
+  // Mostrar botão de exclusão apenas se não for a obra ativa
+  const btnEx = document.getElementById('btnExcluirObra');
+  if(obraAtual && obraAtual.id === id){
+    btnEx.style.display = 'none';
+  } else {
+    btnEx.style.display = 'inline-flex';
+  }
+  document.getElementById('ovObra').classList.remove('hidden');
+}
+
+function salvarObra(){
+  const nome = document.getElementById('ob_nome').value.trim();
+  const curto = document.getElementById('ob_curto').value.trim();
+  const empresa = document.getElementById('ob_empresa').value.trim();
+  if(!nome || !curto || !empresa){
+    toast('Preencha Nome, Nome Curto e Empresa.','w'); return;
+  }
+  const lista = carregarListaObras();
+  if(_editandoObraId){
+    // Editar obra existente
+    const idx = lista.findIndex(o=>o.id===_editandoObraId);
+    if(idx === -1){ toast('Obra não encontrada','e'); return; }
+    lista[idx].nome = nome;
+    lista[idx].nome_curto = curto;
+    lista[idx].empresa = empresa;
+    lista[idx].programa = document.getElementById('ob_programa').value.trim();
+    lista[idx].icone = document.getElementById('ob_icone').value.trim() || '🏗️';
+    lista[idx].cor = document.getElementById('ob_cor').value;
+    lista[idx].end = document.getElementById('ob_end').value.trim();
+    salvarListaObras(lista);
+    toast('✅ Obra atualizada!');
+    // Atualizar info visual se for a obra ativa
+    if(obraAtual && obraAtual.id === _editandoObraId){
+      obraAtual = lista[idx];
+      atualizarIdentidadeObra(obraAtual);
     }
-  });
+  } else {
+    // Nova obra — gerar ID único a partir do nome curto
+    let baseId = curto.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]+/g,'_').replace(/^_|_$/g,'');
+    let newId = baseId;
+    let counter = 2;
+    while(lista.find(o=>o.id===newId)){ newId = baseId+'_'+counter; counter++; }
+    const nova = {
+      id: newId,
+      nome, nome_curto: curto, empresa,
+      programa: document.getElementById('ob_programa').value.trim(),
+      icone: document.getElementById('ob_icone').value.trim() || '🏗️',
+      cor: document.getElementById('ob_cor').value,
+      end: document.getElementById('ob_end').value.trim()
+    };
+    lista.push(nova);
+    salvarListaObras(lista);
+    toast('✅ Obra "'+curto+'" criada!');
+  }
+  fM('ovObra');
+  renderObrasSidebar(obraAtual ? obraAtual.id : null);
+  // Atualizar painel master se estiver aberto
+  const painel = document.getElementById('paineObrasCont');
+  if(painel) painel.innerHTML = verTodasObras();
+}
+
+function excluirObraAtual(){
+  if(!_editandoObraId){ toast('Nenhuma obra selecionada','w'); return; }
+  if(obraAtual && obraAtual.id === _editandoObraId){
+    toast('Não é possível excluir a obra ativa. Troque de obra primeiro.','w'); return;
+  }
+  const ob = getObra(_editandoObraId);
+  if(!ob) return;
+  if(!confirm('Excluir "'+ob.nome+'"? Os dados locais desta obra serão removidos.')){return;}
+  const lista = carregarListaObras().filter(o=>o.id!==_editandoObraId);
+  salvarListaObras(lista);
+  localStorage.removeItem('kairon_'+_editandoObraId);
+  toast('Obra "'+ob.nome_curto+'" excluída.');
+  fM('ovObra');
+  renderObrasSidebar(obraAtual ? obraAtual.id : null);
+  const painel = document.getElementById('paineObrasCont');
+  if(painel) painel.innerHTML = verTodasObras();
 }
 
 function hexToRgb(hex){
@@ -5050,7 +5219,7 @@ function fazerLogin(){
   }
 
   // Carregar dados
-  try{ carregarObra('vila_brasil'); }catch(e){ db=criarDbVazio(OBRAS.vila_brasil); obraAtual=OBRAS.vila_brasil; }
+  const _obras=getObras(); const _primeiraObra=_obras[0]; try{ carregarObra(_primeiraObra.id); }catch(e){ db=criarDbVazio(_primeiraObra); obraAtual=_primeiraObra; }
   try{ sincUsuarios(); }catch(e){}
 
   // Esconder login e mostrar app
@@ -5067,7 +5236,7 @@ function fazerLogin(){
   // Renderizar
   try{ renderDash(); nav('dashboard'); }catch(e){}
   try{ popEpiSelects(); updBdgEpi(); updBdgAlmo(); }catch(e){}
-  setTimeout(()=>{ try{ atualizarSeletorSidebar('vila_brasil'); }catch(e){}; }, 300);
+  const _obraInicial=getObras()[0]; setTimeout(()=>{ try{ renderObrasSidebar(_obraInicial.id); }catch(e){}; }, 300);
 }
 
 function aplicarPerfil(perfil){
