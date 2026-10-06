@@ -2354,7 +2354,7 @@ function abrirOSRapida(){
   document.getElementById('risk_outros').value='';
   // EPIs
   const grid=document.getElementById('os_epis_check');
-  grid.innerHTML=db.epis.map(e=>`<label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer"><input type="checkbox" style="width:auto;min-width:auto;flex-shrink:0" class="os-epi-chk" value="${e.nome}"> ${e.nome}</label>`).join('');
+  grid.innerHTML=db.epis.map(e=>`<label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer"><input type="checkbox" class="os-epi-chk" value="${e.nome}"> ${e.nome}</label>`).join('');
   osGerada=null;
   document.getElementById('ovOS').classList.remove('hidden');
 }
@@ -2669,7 +2669,7 @@ function renderDdsForm(){
 
   const funcsCheck = db.funcionarios.map(f=>`
     <label style="display:flex;align-items:center;gap:7px;padding:5px 0;cursor:pointer;font-size:12px;font-weight:400">
-      <input type="checkbox" style="width:auto;min-width:auto;flex-shrink:0" class="dds-func-chk" value="${f.id}"
+      <input type="checkbox" class="dds-func-chk" value="${f.id}"
         ${(d.participantes||[]).includes(f.id)?'checked':''}>
       <span>${f.nome}</span>
       <span style="color:var(--mu);font-size:11px">— ${f.funcao}</span>
@@ -3391,7 +3391,7 @@ function renderRdoForm(){
   const r=rdoAtual;
   const funcsCheck=db.funcionarios.map(f=>`
     <label style="display:flex;align-items:center;gap:6px;font-size:12px;padding:4px 0;cursor:pointer">
-      <input type="checkbox" style="width:auto;min-width:auto;flex-shrink:0" class="rdo-func-chk" value="${f.id}" ${(r.efeitoFuncs||[]).includes(f.id)?'checked':''}>
+      <input type="checkbox" class="rdo-func-chk" value="${f.id}" ${(r.efeitoFuncs||[]).includes(f.id)?'checked':''}>
       ${f.nome} <span style="color:var(--mu);font-size:11px">— ${f.funcao}</span>
     </label>`).join('');
 
@@ -5343,40 +5343,3 @@ window.addEventListener('appinstalled',()=>{
 </script>
 </body>
 </html>
-/* ── OS: Toggle riscos customizados ── */
-const _riscosOS = new Set();
-function toggleRisco(lb, valor){
-  const ck = lb.querySelector('span');
-  if(_riscosOS.has(valor)){
-    _riscosOS.delete(valor);
-    ck.textContent='';
-    lb.style.borderColor='#e2e8f0';
-    lb.style.background='#fff';
-    ck.style.borderColor='#94a3b8';
-  } else {
-    _riscosOS.add(valor);
-    ck.textContent='✓';
-    ck.style.color='#fff';
-    lb.style.borderColor='#1a4fa8';
-    lb.style.background='#eff6ff';
-    ck.style.borderColor='#1a4fa8';
-    ck.style.background='#1a4fa8';
-  }
-}
-function getRiscosSelecionados(){
-  const outros = document.getElementById('risk_outros')?.value?.trim();
-  const lista = [..._riscosOS];
-  if(outros) lista.push(outros);
-  return lista;
-}
-function resetRiscosOS(){
-  _riscosOS.clear();
-  document.querySelectorAll('#os_riscos_grid label').forEach(lb=>{
-    const ck = lb.querySelector('span');
-    if(ck){ ck.textContent=''; ck.style.background=''; ck.style.borderColor='#94a3b8'; }
-    lb.style.borderColor='#e2e8f0';
-    lb.style.background='#fff';
-  });
-}
-
-
