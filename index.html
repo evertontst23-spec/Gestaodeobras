@@ -4493,9 +4493,18 @@ function hexToRgb(hex){
 async function sbPush(obraId){
   if(typeof supa === 'undefined') return;
   try{
+    // Remover arquivos base64 dos documentos antes de enviar ao Supabase
+    // (arquivos ficam apenas no localStorage para evitar payload > 1MB)
+    const dbParaSupa = JSON.parse(JSON.stringify(db));
+    if(dbParaSupa.documentos){
+      dbParaSupa.documentos = dbParaSupa.documentos.map(d => {
+        const {arquivo, mime, ...meta} = d;
+        return {...meta, temArquivo: !!arquivo, mime: mime || null};
+      });
+    }
     const payload = {
       obra_id: obraId || obraAtual?.id || 'vila_brasil',
-      dados: JSON.stringify(db),
+      dados: JSON.stringify(dbParaSupa),
       updated_at: new Date().toISOString()
     };
     await supa.from('obras_data').upsert(payload, {onConflict:'obra_id'});
@@ -4533,11 +4542,24 @@ async function sbPull(obraId){
 
     if(supaTs > localTsNum || !localRaw){
       // Supabase é mais recente — usar dados do Supabase
+      // Mas preservar arquivos dos documentos que estão no localStorage
+      const localParsed = localRaw ? JSON.parse(localRaw) : null;
       db = dadosSupa;
+      if(localParsed && localParsed.documentos && db.documentos){
+        db.documentos = db.documentos.map(d => {
+          const localDoc = localParsed.documentos.find(ld => ld.id === d.id);
+          if(localDoc && localDoc.arquivo) return {...d, arquivo: localDoc.arquivo, mime: localDoc.mime};
+          return d;
+        });
+        // Preservar docs que só existem localmente (não chegaram ao Supabase)
+        const idsSupaDoc = new Set(db.documentos.map(d => d.id));
+        const soLocal = localParsed.documentos.filter(d => !idsSupaDoc.has(d.id));
+        if(soLocal.length) db.documentos.push(...soLocal);
+      }
       const agora = Date.now();
-      localStorage.setItem(chave, data.dados);
+      localStorage.setItem(chave, JSON.stringify(db));
       localStorage.setItem(chave + '_ts', agora.toString());
-      console.log('[Supabase] Dados carregados da nuvem!');
+      console.log('[Supabase] Dados carregados da nuvem (arquivos preservados do local)!');
       sbOnline = true;
       mostrarStatusSync(true);
       return true;
