@@ -5224,10 +5224,11 @@ function fazerLogin(){
   try{ sincUsuarios(); }catch(e){}
 
   // Esconder login e mostrar app
-  document.getElementById('loginScreen').classList.add('logado');
-  document.getElementById('loginScreen').style.display = 'none';
+  const loginEl = document.getElementById('loginScreen');
+  loginEl.classList.add('logado');
+  loginEl.style.setProperty('display','none','important');
   const appEl = document.querySelector('.app');
-  if(appEl){ appEl.classList.add('logado'); appEl.style.display = 'flex'; }
+  if(appEl){ appEl.classList.add('logado'); appEl.style.setProperty('display','flex','important'); }
 
   // Perfil
   perfilAtual = u.perfil;
