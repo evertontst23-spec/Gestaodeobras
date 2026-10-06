@@ -866,6 +866,7 @@ textarea{resize:vertical;min-height:60px;line-height:1.6}
       <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center">
         <select id="fichaFuncSel" onchange="renderFicha()" style="min-width:220px"><option value="">Selecione o funcionário...</option></select>
         <button class="btn bp no-print" onclick="imprimirFicha()">🖨️ Imprimir Ficha</button>
+        <button class="btn bo no-print" onclick="salvarFichaEpiNoDossie()" style="background:#e8f5e9;border-color:#4caf50;color:#2e7d32">💾 Salvar Ficha no Dossiê</button>
         <span style="font-size:11px;color:var(--mu);margin-left:4px">Válida como documento — NR-6 / CLT Art.166 / Lei 14.063/2020</span>
       </div>
       <div id="fichaContainer"></div>
@@ -1792,6 +1793,7 @@ async function confirmarEpiEntrega(){
   
   const entReg = {id:novoEntId,fid,eid,qty,dt,mot:document.getElementById('ef_mot').value,obs:document.getElementById('ef_obs').value,st:'Entregue',auth:{tp:epiAtp,ts,assinatura:assinaturaImg,facial:facialImg,funcNome:db.funcionarios.find(x=>x.id===fid)?.nome||''},hash};
   db.entregas.push(entReg);
+  atualizarFichaEpiNoDossie(fid); // atualiza ficha no dossiê automaticamente
   sv();
   console.log('[EPI] Entrega salva:', entReg.id, '— Total entregas:', db.entregas.length);
   sbEntrega(entReg);
@@ -2313,6 +2315,110 @@ function imprimirFicha(){
   const fid=parseInt(document.getElementById('fichaFuncSel').value);
   if(!fid){toast('Selecione um funcionário primeiro','w');return}
   window.print();
+}
+
+function gerarHtmlFicha(fid){
+  // Gera HTML standalone da ficha de EPI para um funcionário
+  const f = db.funcionarios.find(x=>x.id===fid);
+  if(!f) return null;
+  const entregas = (db.entregas||[]).filter(e=>e.fid===fid);
+  const epis = db.epis||[];
+  const hoje = new Date().toLocaleDateString('pt-BR');
+  // Agrupa EPIs entregues
+  const grupos = {};
+  entregas.forEach(e=>{
+    const epi = epis.find(x=>x.id===e.eid);
+    if(!epi) return;
+    if(!grupos[e.eid]) grupos[e.eid]={epi,entregas:[]};
+    grupos[e.eid].entregas.push(e);
+  });
+  let tabelasHtml = '';
+  Object.values(grupos).forEach(g=>{
+    const rows = g.entregas.map(e=>`
+      <tr>
+        <td>${e.dt||''}</td>
+        <td>${g.epi.nome||''}</td>
+        <td>${g.epi.ca||''}</td>
+        <td>${e.qty||1}</td>
+        <td>${g.epi.validade||''}</td>
+        <td style="text-align:center">${e.auth?.assinatura?`<img src="${e.auth.assinatura}" style="height:40px">`:''}</td>
+        <td>${e.mot||''}</td>
+      </tr>`).join('');
+    tabelasHtml += `<h3 style="margin:18px 0 6px;font-size:13px;color:#1a4fa8">${g.epi.nome} — CA: ${g.epi.ca||'—'}</h3>
+    <table><thead><tr><th>Data</th><th>EPI</th><th>CA</th><th>Qtd</th><th>Validade</th><th>Assinatura</th><th>Motivo</th></tr></thead><tbody>${rows}</tbody></table>`;
+  });
+  if(!tabelasHtml) tabelasHtml = '<p style="color:#64748b;font-size:12px">Nenhuma entrega registrada.</p>';
+  return `<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8">
+<title>Ficha EPI — ${f.nome}</title>
+<style>
+body{font-family:Arial,sans-serif;margin:0;padding:16px;background:#fff;font-size:12px}
+h1{font-size:16px;margin:0 0 4px;color:#1a4fa8}
+h2{font-size:13px;margin:0 0 16px;color:#475569}
+h3{font-size:12px}
+table{width:100%;border-collapse:collapse;margin-bottom:12px}
+td,th{border:1px solid #ccc;padding:4px 7px}
+th{background:#f0f4ff;font-weight:600}
+.info{display:flex;gap:24px;margin-bottom:14px;font-size:12px}
+.info div{display:flex;flex-direction:column;gap:2px}
+.info label{font-size:10px;color:#64748b;text-transform:uppercase}
+@media print{body{padding:0}}
+</style></head><body>
+<h1>FICHA DE ENTREGA DE EPI</h1>
+<h2>NR-6 / CLT Art.166 / Lei 14.063/2020</h2>
+<div class="info">
+  <div><label>Funcionário</label><strong>${f.nome||''}</strong></div>
+  <div><label>Função</label><span>${f.cargo||''}</span></div>
+  <div><label>Setor</label><span>${f.setor||''}</span></div>
+  <div><label>Admissão</label><span>${f.admissao||''}</span></div>
+  <div><label>CPF</label><span>${f.cpf||''}</span></div>
+  <div><label>Emissão</label><span>${hoje}</span></div>
+</div>
+${tabelasHtml}
+<p style="margin-top:24px;font-size:10px;color:#94a3b8">Documento gerado automaticamente pelo sistema CAD Engenharia e SST — ${hoje}</p>
+</body></html>`;
+}
+
+function salvarFichaEpiNoDossie(){
+  const fid = parseInt(document.getElementById('fichaFuncSel').value);
+  if(!fid){toast('Selecione um funcionário primeiro','w');return;}
+  const f = db.funcionarios.find(x=>x.id===fid);
+  if(!f){toast('Funcionário não encontrado','w');return;}
+  initDocs();
+  const html = gerarHtmlFicha(fid);
+  if(!html){toast('Erro ao gerar ficha','e');return;}
+  const b64 = btoa(unescape(encodeURIComponent(html)));
+  const arquivo = 'data:text/html;base64,' + b64;
+  // Remove ficha anterior desse funcionário (mantém sempre 1 por funcionário)
+  db.documentos = db.documentos.filter(d => !(d.tp==='Ficha de EPI' && d.fid===fid));
+  const hoje = new Date().toISOString().slice(0,10);
+  db.documentos.push({
+    id: Date.now(), fid, tp:'Ficha de EPI',
+    desc:`Ficha de EPI — ${f.nome}`,
+    dt: hoje, val:'', arquivo, mime:'text/html', ts: new Date().toISOString()
+  });
+  sv();
+  toast('✅ Ficha de EPI salva no dossiê de '+f.nome+'!');
+  if(document.getElementById('page-dossie-func')?.classList.contains('active')) renderDossieFunc();
+  if(document.getElementById('page-dossie-lista')?.classList.contains('active')) renderDossieLista();
+}
+
+function atualizarFichaEpiNoDossie(fid){
+  // Chamada automaticamente ao registrar entrega de EPI
+  initDocs();
+  const f = db.funcionarios.find(x=>x.id===fid);
+  if(!f) return;
+  const html = gerarHtmlFicha(fid);
+  if(!html) return;
+  const b64 = btoa(unescape(encodeURIComponent(html)));
+  const arquivo = 'data:text/html;base64,' + b64;
+  db.documentos = db.documentos.filter(d => !(d.tp==='Ficha de EPI' && d.fid===fid));
+  const hoje = new Date().toISOString().slice(0,10);
+  db.documentos.push({
+    id: Date.now(), fid, tp:'Ficha de EPI',
+    desc:`Ficha de EPI — ${f.nome}`,
+    dt: hoje, val:'', arquivo, mime:'text/html', ts: new Date().toISOString()
+  });
+  // sv() não é chamado aqui — o caller já chama sv()
 }
 
 /* init */
