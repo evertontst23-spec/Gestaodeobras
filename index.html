@@ -2319,63 +2319,176 @@ function imprimirFicha(){
 }
 
 function gerarHtmlFicha(fid){
-  // Gera HTML standalone da ficha de EPI para um funcionário
+  // Gera HTML standalone da ficha de EPI — idêntica à tela de Ficha EPI
   const f = db.funcionarios.find(x=>x.id===fid);
   if(!f) return null;
-  const entregas = (db.entregas||[]).filter(e=>e.fid===fid);
-  const epis = db.epis||[];
+  const entregas = (db.entregas||[]).filter(e=>e.fid===fid).sort((a,b)=>a.dt.localeCompare(b.dt));
   const hoje = new Date().toLocaleDateString('pt-BR');
-  // Agrupa EPIs entregues
-  const grupos = {};
-  entregas.forEach(e=>{
-    const epi = epis.find(x=>x.id===e.eid);
-    if(!epi) return;
-    if(!grupos[e.eid]) grupos[e.eid]={epi,entregas:[]};
-    grupos[e.eid].entregas.push(e);
-  });
-  let tabelasHtml = '';
-  Object.values(grupos).forEach(g=>{
-    const rows = g.entregas.map(e=>`
-      <tr>
-        <td>${e.dt||''}</td>
-        <td>${g.epi.nome||''}</td>
-        <td>${g.epi.ca||''}</td>
-        <td>${e.qty||1}</td>
-        <td>${g.epi.validade||''}</td>
-        <td style="text-align:center">${e.auth?.assinatura?`<img src="${e.auth.assinatura}" style="height:40px">`:''}</td>
-        <td>${e.mot||''}</td>
-      </tr>`).join('');
-    tabelasHtml += `<h3 style="margin:18px 0 6px;font-size:13px;color:#1a4fa8">${g.epi.nome} — CA: ${g.epi.ca||'—'}</h3>
-    <table><thead><tr><th>Data</th><th>EPI</th><th>CA</th><th>Qtd</th><th>Validade</th><th>Assinatura</th><th>Motivo</th></tr></thead><tbody>${rows}</tbody></table>`;
-  });
-  if(!tabelasHtml) tabelasHtml = '<p style="color:#64748b;font-size:12px">Nenhuma entrega registrada.</p>';
+  const horaImp = new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+
+  // Linhas da tabela de entregas
+  let linhas = '';
+  if(entregas.length===0){
+    linhas = `<tr><td colspan="8" style="text-align:center;padding:20px;color:#666;font-style:italic">Nenhuma entrega registrada</td></tr>`;
+  } else {
+    entregas.forEach((e,i)=>{
+      const ep = db.epis.find(x=>x.id===e.eid)||{};
+      const authLabel = e.auth?.tp==='facial'?'Reconhecimento Facial':'Assinatura Digital';
+      linhas += `<tr style="border-bottom:1px solid #ccc;background:${e.st==='Devolvido'?'#eff6ff':'#fff'}">
+        <td style="padding:6px 8px;text-align:center;font-size:12px">${i+1}</td>
+        <td style="padding:6px 8px;font-size:12px">
+          ${e.dt}
+          ${e.st==='Devolvido'&&e.dtDevolucao?`<br><span style="font-size:9px;color:#1d4ed8;font-weight:600">↩ Dev: ${e.dtDevolucao}${e.hrDevolucao?' '+e.hrDevolucao:''}</span>`:''}
+        </td>
+        <td style="padding:6px 8px;font-size:12px;font-weight:600">${ep.nome||'—'}</td>
+        <td style="padding:6px 8px;font-size:11px;text-align:center">${ep.ca||'—'}</td>
+        <td style="padding:6px 8px;font-size:12px;text-align:center">${e.qty}</td>
+        <td style="padding:6px 8px;font-size:11px">${e.mot||'—'}</td>
+        <td style="padding:6px 8px;font-size:11px;text-align:center">
+          <span style="background:${e.st==='Entregue'?'#dcfce7':e.st==='Devolvido'?'#dbeafe':'#fef3c7'};color:${e.st==='Entregue'?'#15803d':e.st==='Devolvido'?'#1d4ed8':'#d97706'};padding:2px 7px;border-radius:12px;font-size:10px;font-weight:600">${e.st}</span>
+        </td>
+        <td style="padding:6px 8px;font-size:10px;color:#666;text-align:center">${authLabel}<br><span style="font-size:9px;color:#999">${e.auth?.ts?new Date(e.auth.ts).toLocaleString('pt-BR'):''}</span></td>
+      </tr>`;
+    });
+  }
+
+  const ativosCount = entregas.filter(e=>e.st==='Entregue').length;
+  const devolvidosCount = entregas.filter(e=>e.st==='Devolvido').length;
+
+  // Bloco de confirmações digitais (fotos faciais + hash)
+  let assinaturasHtml = '';
+  if(!entregas.length){
+    assinaturasHtml = '<div style="padding:20px;text-align:center;color:#999;font-size:13px">Nenhuma entrega registrada para este funcionário</div>';
+  } else {
+    assinaturasHtml = entregas.map((e,i)=>{
+      const ep = db.epis.find(x=>x.id===e.eid)||{};
+      const auth = e.auth||{};
+      const dtFmt = auth.ts ? new Date(auth.ts).toLocaleString('pt-BR') : (e.dt||'—');
+      const cor = e.st==='Devolvido'?'#1d4ed8':'#15803d';
+      const bgCor = e.st==='Devolvido'?'#eff6ff':'#f0fdf4';
+      let fotoHtml = '';
+      if(auth.facial && auth.facial.length>100){
+        fotoHtml = `<img src="${auth.facial}" style="width:80px;height:80px;border-radius:8px;object-fit:cover;border:3px solid #22c55e;display:block">`;
+      } else {
+        fotoHtml = `<div style="width:80px;height:80px;border-radius:8px;background:#f0fdf4;border:3px solid #22c55e;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:2px"><div style="font-size:28px">👤</div><div style="font-size:8px;color:#15803d;font-weight:700;text-align:center">FACIAL<br>CONF.</div></div>`;
+      }
+      return `<div style="border:1.5px solid ${cor}30;border-radius:10px;margin-bottom:12px;overflow:hidden;background:${bgCor}">
+        <div style="background:${cor};color:#fff;padding:8px 14px;display:flex;justify-content:space-between;align-items:center;gap:8px">
+          <div style="font-size:12px;font-weight:700">ENTREGA #${String(i+1).padStart(2,'0')} — ${ep.nome||'EPI'}</div>
+          <span style="font-size:11px;background:rgba(255,255,255,.2);padding:2px 8px;border-radius:12px">${e.st||'Entregue'}</span>
+        </div>
+        <div style="padding:12px 14px">
+          <div style="display:flex;gap:16px;margin-bottom:12px;flex-wrap:wrap">
+            <div style="font-size:12px"><span style="color:#6b7280">CA:</span> <strong>${ep.ca||'—'}</strong></div>
+            <div style="font-size:12px"><span style="color:#6b7280">Qtd:</span> <strong>${e.qty||1} un.</strong></div>
+            <div style="font-size:12px"><span style="color:#6b7280">Motivo:</span> <strong>${e.mot||'—'}</strong></div>
+            <div style="font-size:12px"><span style="color:#6b7280">Data:</span> <strong>${e.dt||'—'}</strong></div>
+          </div>
+          <div style="background:#fff;border:1px solid ${cor}40;border-radius:8px;padding:10px 12px">
+            <div style="font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">Confirmação de Recebimento</div>
+            <div style="display:flex;align-items:center;gap:12px">
+              ${fotoHtml}
+              <div style="flex:1">
+                <div style="font-size:13px;font-weight:700;color:${cor};margin-bottom:3px">✅ Identidade Confirmada — ${auth.tp==='facial'?'Reconhecimento Facial':'Confirmação Digital'}</div>
+                <div style="font-size:12px;color:#374151;margin-bottom:2px"><strong>${f.nome}</strong> — Mat. ${f.mat||'N/A'}</div>
+                <div style="font-size:11px;color:#6b7280;margin-bottom:4px">📅 ${dtFmt}</div>
+                <div style="display:flex;gap:8px;flex-wrap:wrap">
+                  <span style="font-size:10px;background:#dbeafe;color:#1d4ed8;padding:2px 7px;border-radius:10px;font-weight:600">Lei 14.063/2020</span>
+                  <span style="font-size:10px;background:#dcfce7;color:#15803d;padding:2px 7px;border-radius:10px;font-weight:600">NR-6 · 6.6.1</span>
+                  <span style="font-size:10px;background:#f3e8ff;color:#7c3aed;padding:2px 7px;border-radius:10px;font-weight:600">Ass. Eletrônica Avançada</span>
+                </div>
+              </div>
+            </div>
+            <div style="margin-top:10px;padding:6px 8px;background:#f8faff;border-radius:6px;border-left:3px solid ${cor}">
+              <div style="font-size:9px;color:#6b7280;font-weight:700;margin-bottom:2px">🔐 HASH SHA-256 — Integridade do Registro</div>
+              <div style="font-size:9px;font-family:monospace;color:#374151;word-break:break-all">${e.hash||'não gerado'}</div>
+            </div>
+          </div>
+          ${e.obs?`<div style="margin-top:8px;font-size:12px;color:#6b7280"><strong>Obs:</strong> ${e.obs}</div>`:''}
+          ${e.st==='Devolvido'&&e.dtDevolucao?`<div style="margin-top:10px;background:#eff6ff;border:1.5px solid #2563eb;border-radius:8px;padding:10px 12px">
+            <div style="font-size:10px;font-weight:700;color:#1d4ed8;text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px">↩ Registro de Devolução</div>
+            <div style="display:flex;align-items:center;gap:10px">
+              <div style="font-size:24px">📦</div>
+              <div>
+                <div style="font-size:12px;font-weight:700;color:#1d4ed8">EPI Devolvido ao Almoxarifado</div>
+                <div style="font-size:11px;color:#374151;margin-top:2px">📅 Data: <strong>${e.dtDevolucao}</strong>${e.hrDevolucao?' às <strong>'+e.hrDevolucao+'</strong>':''}</div>
+                <div style="font-size:11px;color:#374151">📦 Quantidade: <strong>${e.qty||1} un.</strong> devolvida(s)</div>
+                <div style="font-size:10px;color:#6b7280;margin-top:4px">Estoque atualizado automaticamente</div>
+              </div>
+            </div>
+          </div>`:''}
+        </div>
+      </div>`;
+    }).join('');
+  }
+
   return `<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Ficha EPI — ${f.nome}</title>
-<style>
-body{font-family:Arial,sans-serif;margin:0;padding:16px;background:#fff;font-size:12px}
-h1{font-size:16px;margin:0 0 4px;color:#1a4fa8}
-h2{font-size:13px;margin:0 0 16px;color:#475569}
-h3{font-size:12px}
-table{width:100%;border-collapse:collapse;margin-bottom:12px}
-td,th{border:1px solid #ccc;padding:4px 7px}
-th{background:#f0f4ff;font-weight:600}
-.info{display:flex;gap:24px;margin-bottom:14px;font-size:12px}
-.info div{display:flex;flex-direction:column;gap:2px}
-.info label{font-size:10px;color:#64748b;text-transform:uppercase}
-@media print{body{padding:0}}
-</style></head><body>
-<h1>FICHA DE ENTREGA DE EPI</h1>
-<h2>NR-6 / CLT Art.166 / Lei 14.063/2020</h2>
-<div class="info">
-  <div><label>Funcionário</label><strong>${f.nome||''}</strong></div>
-  <div><label>Função</label><span>${f.cargo||''}</span></div>
-  <div><label>Setor</label><span>${f.setor||''}</span></div>
-  <div><label>Admissão</label><span>${f.admissao||''}</span></div>
-  <div><label>CPF</label><span>${f.cpf||''}</span></div>
-  <div><label>Emissão</label><span>${hoje}</span></div>
+<style>body{margin:0;padding:16px;background:#fff;font-family:Arial,sans-serif}@media print{body{padding:0}}</style>
+</head><body>
+<div style="background:#fff;font-family:Arial,sans-serif;max-width:860px;margin:0 auto;border:2px solid #1a56db;border-radius:8px;overflow:hidden">
+  <div style="background:#1a56db;color:#fff;padding:16px 20px;display:flex;align-items:center;justify-content:space-between">
+    <div>
+      <div style="font-size:18px;font-weight:700;letter-spacing:-.3px">⚡ CAD ENGENHARIA E SST</div>
+      <div style="font-size:11px;opacity:.85;margin-top:2px">Consultoria e Gestão em Segurança do Trabalho</div>
+    </div>
+    <div style="text-align:right">
+      <div style="font-size:14px;font-weight:700">FICHA DE CONTROLE DE EPI</div>
+      <div style="font-size:10px;opacity:.85;margin-top:2px">NR-6 · CLT Art.166 · Lei 14.063/2020</div>
+    </div>
+  </div>
+  <div style="background:#1648c0;color:#fff;padding:8px 20px;display:flex;justify-content:space-between;align-items:center;border-bottom:3px solid #fbbf24">
+    <div style="display:flex;align-items:center;gap:20px">
+      <div><div style="font-size:9px;opacity:.75;text-transform:uppercase;letter-spacing:.06em">Empresa Responsável</div><div style="font-size:13px;font-weight:700">CONSTRUTORA MARDIFI LTDA</div></div>
+      <div style="width:1px;height:30px;background:rgba(255,255,255,.3)"></div>
+      <div><div style="font-size:9px;opacity:.75;text-transform:uppercase;letter-spacing:.06em">Obra</div><div style="font-size:13px;font-weight:700">URBANIZAÇÃO VILA BRASIL</div></div>
+    </div>
+    <div style="text-align:right"><div style="font-size:9px;opacity:.75;text-transform:uppercase;letter-spacing:.06em">Programa</div><div style="font-size:12px;font-weight:600">ProMorar · Prefeitura do Recife</div></div>
+  </div>
+  <div style="padding:14px 20px;border-bottom:2px solid #e0e2e8;background:#f8faff">
+    <div style="font-size:11px;font-weight:700;color:#1a56db;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">Dados do Trabalhador</div>
+    <div style="display:grid;grid-template-columns:2fr 1fr 1fr;gap:12px">
+      <div><div style="font-size:10px;color:#666;font-weight:600;text-transform:uppercase">Nome Completo</div><div style="font-size:13px;font-weight:600;margin-top:2px">${f.nome}</div></div>
+      <div><div style="font-size:10px;color:#666;font-weight:600;text-transform:uppercase">Matrícula</div><div style="font-size:13px;font-weight:600;margin-top:2px">${f.mat}</div></div>
+      <div><div style="font-size:10px;color:#666;font-weight:600;text-transform:uppercase">CPF</div><div style="font-size:13px;font-weight:600;margin-top:2px">${f.cpf||'—'}</div></div>
+    </div>
+    <div style="display:grid;grid-template-columns:2fr 1fr 1fr;gap:12px;margin-top:10px">
+      <div><div style="font-size:10px;color:#666;font-weight:600;text-transform:uppercase">Função / Cargo</div><div style="font-size:13px;font-weight:600;margin-top:2px">${f.funcao||'—'}</div></div>
+      <div><div style="font-size:10px;color:#666;font-weight:600;text-transform:uppercase">Setor / Obra</div><div style="font-size:13px;font-weight:600;margin-top:2px">${f.setor||'—'}</div></div>
+      <div><div style="font-size:10px;color:#666;font-weight:600;text-transform:uppercase">Total de Entregas</div><div style="font-size:13px;font-weight:600;margin-top:2px">${ativosCount} ativo(s) · ${devolvidosCount} devolvido(s)</div></div>
+    </div>
+  </div>
+  <div style="padding:8px 20px;background:#fffbeb;border-bottom:1px solid #fde68a">
+    <div style="font-size:10px;color:#92400e;line-height:1.5"><strong>Declaração:</strong> O trabalhador acima identificado recebeu os EPIs listados nesta ficha, comprometendo-se a utilizá-los corretamente, conservá-los, comunicar ao empregador qualquer alteração que os torne impróprios para uso e cumprir as determinações do empregador sobre o assunto, nos termos da NR-6 e do Art.166 da CLT. A autenticação digital tem validade jurídica conforme a <strong>Lei 14.063/2020</strong>.</div>
+  </div>
+  <div style="padding:14px 20px">
+    <div style="font-size:11px;font-weight:700;color:#1a56db;text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px">Registro de Entregas e Devoluções</div>
+    <table style="width:100%;border-collapse:collapse;border:1px solid #ccc">
+      <thead>
+        <tr style="background:#1a56db;color:#fff">
+          <th style="padding:7px 8px;font-size:10px;font-weight:700;text-align:center;width:32px">#</th>
+          <th style="padding:7px 8px;font-size:10px;font-weight:700;text-align:left;width:80px">Data</th>
+          <th style="padding:7px 8px;font-size:10px;font-weight:700;text-align:left">EPI / Descrição</th>
+          <th style="padding:7px 8px;font-size:10px;font-weight:700;text-align:center;width:60px">Nº CA</th>
+          <th style="padding:7px 8px;font-size:10px;font-weight:700;text-align:center;width:40px">Qtd</th>
+          <th style="padding:7px 8px;font-size:10px;font-weight:700;text-align:left;width:90px">Motivo</th>
+          <th style="padding:7px 8px;font-size:10px;font-weight:700;text-align:center;width:80px">Status</th>
+          <th style="padding:7px 8px;font-size:10px;font-weight:700;text-align:center;width:120px">Confirmação</th>
+        </tr>
+      </thead>
+      <tbody>${linhas}</tbody>
+    </table>
+  </div>
+  <div style="padding:14px 20px;border-top:1px solid #e0e2e8">
+    <div style="font-size:11px;font-weight:700;color:#1a56db;text-transform:uppercase;letter-spacing:.05em;margin-bottom:12px">✅ Confirmações Digitais de Recebimento</div>
+    ${assinaturasHtml}
+  </div>
+  <div style="background:#f0f2f5;padding:10px 20px;border-top:1px solid #e0e2e8;display:flex;justify-content:space-between;align-items:center">
+    <div style="font-size:10px;color:#6b7280">Gerado em: ${hoje} às ${horaImp} · CAD Engenharia e SST v4.0</div>
+    <div style="font-size:10px;color:#6b7280">NR-6 Portaria MTE 3.214/78 · CLT Art.166 · Lei 14.063/2020</div>
+  </div>
 </div>
-${tabelasHtml}
-<p style="margin-top:24px;font-size:10px;color:#94a3b8">Documento gerado automaticamente pelo sistema CAD Engenharia e SST — ${hoje}</p>
 </body></html>`;
 }
 
