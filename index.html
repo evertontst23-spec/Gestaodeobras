@@ -656,6 +656,7 @@ textarea{resize:vertical;min-height:60px;line-height:1.6}
       <button class="ni" onclick="nav('fin-fluxo');fecharNavDrawer()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>Fluxo de Caixa</button>
       <button class="ni" onclick="nav('fin-rec');fecharNavDrawer()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/></svg>Medições / BM</button>
       <button class="ni" onclick="nav('fin-desp');fecharNavDrawer()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/></svg>Despesas</button>
+      <button class="ni" onclick="nav('fin-folha');fecharNavDrawer()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 3h-8a2 2 0 0 0-2 2v2h12V5a2 2 0 0 0-2-2z"/><line x1="8" y1="12" x2="8" y2="12"/><line x1="12" y1="12" x2="16" y2="12"/><line x1="8" y1="16" x2="8" y2="16"/><line x1="12" y1="16" x2="16" y2="16"/></svg>Folha de Pagamento</button>
       <div class="ns">Obra</div>
       <button class="ni" onclick="nav('rdo-lista');fecharNavDrawer()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>RDO</button>
       <button class="ni" onclick="nav('bm-lista');fecharNavDrawer()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/></svg>Boletim Medição</button>
@@ -741,6 +742,7 @@ textarea{resize:vertical;min-height:60px;line-height:1.6}
     <button class="ni" onclick="nav('fin-rec')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>Medições / Receitas</button>
     <button class="ni" onclick="nav('fin-desp')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></svg>Despesas / Fornec.</button>
     <button class="ni" onclick="nav('fin-imp')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/></svg>Impostos / Retenções</button>
+    <button class="ni" onclick="nav('fin-folha')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 3h-8a2 2 0 0 0-2 2v2h12V5a2 2 0 0 0-2-2z"/><line x1="8" y1="12" x2="8" y2="12"/><line x1="12" y1="12" x2="16" y2="12"/><line x1="8" y1="16" x2="8" y2="16"/><line x1="12" y1="16" x2="16" y2="16"/></svg>Folha de Pagamento</button>
     <div class="ns">Obra</div>
     <button class="ni" onclick="nav('rdo-lista')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg>RDO — Rel. Diário</button>
     <button class="ni" onclick="nav('bm-lista')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>BM — Boletim Medição</button>
@@ -783,6 +785,48 @@ textarea{resize:vertical;min-height:60px;line-height:1.6}
     <div id="page-fin-rec" class="page"><div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap"><button class="btn bp" onclick="abrirMRec()">+ Nova Medição / Receita</button><select id="filRecSt" onchange="renderReceitas()" style="width:150px"><option value="">Todos</option><option>Pendente</option><option>Faturado</option><option>Recebido</option><option>Retido</option></select><div class="sw" style="flex:1;min-width:160px"><svg class="si" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input id="buscaRec" placeholder="Buscar..." oninput="renderReceitas()"></div></div><div class="card tw"><table><thead><tr><th>BM/Ref.</th><th>Descrição</th><th>Contratante</th><th>Vencimento</th><th>Valor Bruto</th><th>Retenções</th><th>Líquido</th><th>Status</th><th></th></tr></thead><tbody id="tbRec"></tbody></table></div></div>
     <div id="page-fin-desp" class="page"><div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap"><button class="btn bp" onclick="abrirMDesp()">+ Nova Despesa</button><select id="filDespCat" onchange="renderDespesas()" style="width:180px"><option value="">Todas categorias</option></select><select id="filDespSt" onchange="renderDespesas()" style="width:140px"><option value="">Todos status</option><option>A Pagar</option><option>Pago</option><option>Vencido</option></select><div class="sw" style="flex:1;min-width:160px"><svg class="si" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input id="buscaDesp" placeholder="Buscar..." oninput="renderDespesas()"></div></div><div class="card tw"><table><thead><tr><th>Data</th><th>Descrição</th><th>Categoria</th><th>Fornecedor</th><th>Vencimento</th><th>Valor</th><th>Status</th><th></th></tr></thead><tbody id="tbDesp"></tbody></table></div></div>
     <div id="page-fin-imp" class="page"><div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap"><button class="btn bp" onclick="abrirMImp()">+ Lançar Imposto</button><select id="filImpSt" onchange="renderImpostos()" style="width:148px"><option value="">Todos</option><option>A Recolher</option><option>Recolhido</option><option>Retido</option></select></div><div class="sg" id="impSg"></div><div class="card tw"><table><thead><tr><th>Competência</th><th>Tipo</th><th>Base Cálculo</th><th>Alíquota</th><th>Valor</th><th>Vencimento</th><th>Status</th><th></th></tr></thead><tbody id="tbImp"></tbody></table></div></div>
+
+    <div id="page-fin-folha" class="page">
+      <!-- Tabela Salarial por Função -->
+      <div class="card" style="margin-bottom:16px">
+        <div class="ch" style="cursor:pointer" onclick="toggleTabelaSal()">
+          <h3>💰 Tabela Salarial por Função</h3>
+          <div style="display:flex;gap:8px;align-items:center">
+            <span id="tabelaSalStatus" style="font-size:12px;color:var(--mu)"></span>
+            <button class="btn bp bsm" onclick="event.stopPropagation();abrirModalSalario()">+ Nova Função</button>
+            <span id="tabelaSalToggle" style="font-size:18px;color:var(--mu)">▼</span>
+          </div>
+        </div>
+        <div id="tabelaSalBody" class="cb">
+          <div style="font-size:12px;color:var(--mu);margin-bottom:8px">
+            Defina o salário e benefícios por <b>função/cargo</b>. Os valores são aplicados automaticamente na folha de pagamento para todos os funcionários com aquela função.
+          </div>
+          <div id="tbSalFunc"></div>
+        </div>
+      </div>
+
+      <!-- Cabeçalho da Folha -->
+      <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;align-items:center">
+        <input type="month" id="folhaMes" onchange="renderFolha()" style="width:150px">
+        <button class="btn bp" onclick="fecharFolha()">✅ Fechar Folha</button>
+        <button class="btn bo" onclick="imprimirFolha()">🖨️ Imprimir</button>
+        <span id="folhaStatus" style="font-size:12px;padding:4px 10px;border-radius:12px;border:1px solid var(--bd)"></span>
+      </div>
+      <div class="sg" id="folhaSg"></div>
+      <div class="card tw" style="overflow-x:auto">
+        <table style="min-width:820px">
+          <thead><tr>
+            <th>Funcionário</th><th>Função</th>
+            <th>Salário Base</th><th>Faltas</th><th>Desc. Faltas</th>
+            <th>V. Alimentação</th><th>V. Transporte</th>
+            <th>Total Benefícios</th><th>Líquido</th><th></th>
+          </tr></thead>
+          <tbody id="tbFolha"></tbody>
+          <tfoot id="tfFolha"></tfoot>
+        </table>
+      </div>
+      <div id="folhaHistorico" style="margin-top:16px"></div>
+    </div>
     <div id="page-epi-ficha" class="page">
       <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center">
         <select id="fichaFuncSel" onchange="renderFicha()" style="min-width:220px"><option value="">Selecione o funcionário...</option></select>
@@ -1501,7 +1545,7 @@ let db = {
   funcionarios:[], fornecedores:[], epis:[], materiais:[],
   movAlmo:[], entregas:[], ponto:[], rdos:[], bms:[], dds:[],
   documentos:[], receitas:[], despesas:[], impostos:[], usuarios:[],
-  nids:{f:1,fn:1,epi:1,mat:1,mov:1,ent:1,pt:1,rec:1,desp:1,imp:1,rdo:1,bm:1,dds:1}
+  nids:{f:1,fn:1,epi:1,mat:1,mov:1,ent:1,pt:1,rec:1,desp:1,imp:1,rdo:1,bm:1,dds:1,salFunc:1},tabelaSal:[]
 };
 function sv(){
   if(!obraAtual) return;
@@ -1524,7 +1568,7 @@ function tick(){const n=new Date(),t=n.toLocaleTimeString('pt-BR');const e1=docu
 setInterval(tick,1000);tick();
 
 /* nav */
-const PT={dashboard:'Dashboard',ponto:'Bater Ponto','rel-ponto':'Relatório de Ponto','epi-entrega':'Registrar Entrega EPI','epi-hist':'Histórico EPI','dds-lista':'DDS — Diálogos de Segurança','dds-novo':'Novo DDS','epi-ficha':'Ficha Individual de EPI','epi-est':'Estoque EPI','almo-mov':'Almoxarifado — Movimentação','almo-est':'Almoxarifado — Estoque','almo-rel':'Almoxarifado — Relatório','fin-fluxo':'Financeiro — Fluxo de Caixa','fin-rec':'Medições / Receitas','fin-desp':'Despesas / Fornecedores','fin-imp':'Impostos / Retenções','funcs':'Funcionários','forns':'Fornecedores','rdo-lista':'RDO — Relatórios Diários de Obra','rdo-novo':'Novo RDO','bm-lista':'BM — Boletins de Medição','bm-novo':'Novo Boletim de Medição','dossie-lista':'Dossiê — Pastas dos Trabalhadores','dossie-func':'Dossiê do Trabalhador'};
+const PT={dashboard:'Dashboard',ponto:'Bater Ponto','rel-ponto':'Relatório de Ponto','epi-entrega':'Registrar Entrega EPI','epi-hist':'Histórico EPI','dds-lista':'DDS — Diálogos de Segurança','dds-novo':'Novo DDS','epi-ficha':'Ficha Individual de EPI','epi-est':'Estoque EPI','almo-mov':'Almoxarifado — Movimentação','almo-est':'Almoxarifado — Estoque','almo-rel':'Almoxarifado — Relatório','fin-fluxo':'Financeiro — Fluxo de Caixa','fin-rec':'Medições / Receitas','fin-desp':'Despesas / Fornecedores','fin-imp':'Impostos / Retenções','fin-folha':'Folha de Pagamento','funcs':'Funcionários','forns':'Fornecedores','rdo-lista':'RDO — Relatórios Diários de Obra','rdo-novo':'Novo RDO','bm-lista':'BM — Boletins de Medição','bm-novo':'Novo Boletim de Medição','dossie-lista':'Dossiê — Pastas dos Trabalhadores','dossie-func':'Dossiê do Trabalhador'};
 function nav(pg){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.ni').forEach(n=>n.classList.remove('active'));
@@ -1532,7 +1576,7 @@ function nav(pg){
   const b=document.querySelector(`.ni[onclick="nav('${pg}')"]`);if(b)b.classList.add('active');
   document.getElementById('pgTitle').textContent=PT[pg]||pg;
   pararPonto();
-  const r={dashboard:renderDash,ponto:()=>{},  'rel-ponto':()=>{initMes('filPontoMes');renderRelPonto()},'epi-entrega':()=>{popEpiSelects();resetEpiAuth()},'epi-hist':renderEpiHist,'dds-lista':renderDdsLista,'dds-novo':()=>{},'epi-ficha':()=>{popFichaSelect();renderFicha()},'epi-est':renderEpiEst,'almo-mov':()=>{popAlmoSelects();renderMov()},'almo-est':()=>{popCatFil();renderEstMat()},'almo-rel':()=>{initMes('filAlmoMes');renderRelAlmo();renderAlmoSg()},'fin-fluxo':()=>{initMes('filFinMes');renderFinFluxo()},'fin-rec':()=>{popDespSelects();renderReceitas()},'fin-desp':()=>{popDespSelects();popFilDespCat();renderDespesas()},'fin-imp':renderImpostos,'funcs':renderFuncs,'forns':renderForns,'rdo-lista':renderRdoLista,'rdo-novo':()=>{},'bm-lista':renderBmLista,'bm-novo':()=>{},'dossie-lista':renderDossieLista,'dossie-func':()=>{}};
+  const r={dashboard:renderDash,ponto:()=>{},  'rel-ponto':()=>{initMes('filPontoMes');renderRelPonto()},'epi-entrega':()=>{popEpiSelects();resetEpiAuth()},'epi-hist':renderEpiHist,'dds-lista':renderDdsLista,'dds-novo':()=>{},'epi-ficha':()=>{popFichaSelect();renderFicha()},'epi-est':renderEpiEst,'almo-mov':()=>{popAlmoSelects();renderMov()},'almo-est':()=>{popCatFil();renderEstMat()},'almo-rel':()=>{initMes('filAlmoMes');renderRelAlmo();renderAlmoSg()},'fin-fluxo':()=>{initMes('filFinMes');renderFinFluxo()},'fin-rec':()=>{popDespSelects();renderReceitas()},'fin-desp':()=>{popDespSelects();popFilDespCat();renderDespesas()},'fin-imp':renderImpostos,'fin-folha':()=>{initFolhaMes();renderTabelaSal();renderFolha()},'funcs':renderFuncs,'forns':renderForns,'rdo-lista':renderRdoLista,'rdo-novo':()=>{},'bm-lista':renderBmLista,'bm-novo':()=>{},'dossie-lista':renderDossieLista,'dossie-func':()=>{}};
   if(r[pg])r[pg]();
 }
 
@@ -1944,6 +1988,112 @@ function delFunc(id){if(!confirm('Excluir funcionário?'))return;db.funcionarios
 function rmFace(id){if(!confirm('Remover face?'))return;db.funcionarios.find(x=>x.id===id).face=null;sv();renderFuncs();toast('Face removida')}
 
 
+
+/* ═══════════════════ TABELA SALARIAL POR FUNÇÃO ═══════════════════ */
+let _tabelaSalOpen = true;
+
+function toggleTabelaSal(){
+  _tabelaSalOpen = !_tabelaSalOpen;
+  document.getElementById('tabelaSalBody').style.display = _tabelaSalOpen ? '' : 'none';
+  document.getElementById('tabelaSalToggle').textContent = _tabelaSalOpen ? '▼' : '▶';
+}
+
+function abrirModalSalario(id){
+  if(!db.tabelaSal) db.tabelaSal=[];
+  document.getElementById('salFuncMT').textContent = id ? 'Editar Função Salarial' : 'Nova Função Salarial';
+  document.getElementById('sf_id').value = id||'';
+  if(id){
+    const r = db.tabelaSal.find(x=>x.id===id)||{};
+    document.getElementById('sf_func').value = r.func||'';
+    document.getElementById('sf_sal').value  = r.sal||'';
+    document.getElementById('sf_ali').value  = r.ali||'';
+    document.getElementById('sf_vt').value   = r.vt||'';
+    document.getElementById('sf_np').value   = r.np||2;
+    document.getElementById('sf_dtm').value  = r.dtm||22;
+    document.getElementById('sf_banco').value= r.banco||'';
+  } else {
+    ['sf_func','sf_sal','sf_ali','sf_vt','sf_banco'].forEach(x=>document.getElementById(x).value='');
+    document.getElementById('sf_np').value=2;
+    document.getElementById('sf_dtm').value=22;
+  }
+  oM('ovSalFunc');
+}
+
+function salvarSalFunc(){
+  if(!db.tabelaSal) db.tabelaSal=[];
+  const func = document.getElementById('sf_func').value.trim();
+  if(!func){ toast('Informe a função/cargo','w'); return; }
+  const sal  = parseFloat(document.getElementById('sf_sal').value)||0;
+  const ali  = parseFloat(document.getElementById('sf_ali').value)||0;
+  const vt   = parseFloat(document.getElementById('sf_vt').value)||0;
+  const np   = parseInt(document.getElementById('sf_np').value)||2;
+  const dtm  = parseInt(document.getElementById('sf_dtm').value)||22;
+  const banco= document.getElementById('sf_banco').value.trim();
+  const eid  = document.getElementById('sf_id').value;
+  if(eid){
+    const r = db.tabelaSal.find(x=>x.id===Number(eid));
+    if(r) Object.assign(r,{func,sal,ali,vt,np,dtm,banco});
+  } else {
+    const nId = (db.nids.salFunc||0)+1; db.nids.salFunc=nId;
+    db.tabelaSal.push({id:nId,func,sal,ali,vt,np,dtm,banco});
+  }
+  fM('ovSalFunc');
+  sv(); renderTabelaSal(); renderFolha();
+  toast('Função salarial salva!','s');
+}
+
+function removerSalFunc(id){
+  if(!confirm('Remover esta função salarial?')) return;
+  db.tabelaSal = (db.tabelaSal||[]).filter(x=>x.id!==id);
+  sv(); renderTabelaSal(); renderFolha();
+  toast('Removido');
+}
+
+function getSalarioFuncao(funcao){
+  // Returns salary row for the given funcao (case-insensitive match)
+  if(!db.tabelaSal||!funcao) return null;
+  const f = funcao.trim().toLowerCase();
+  return db.tabelaSal.find(x=>x.func&&x.func.trim().toLowerCase()===f)||null;
+}
+
+function renderTabelaSal(){
+  if(!db.tabelaSal) db.tabelaSal=[];
+  const el = document.getElementById('tbSalFunc');
+  if(!el) return;
+  const st = document.getElementById('tabelaSalStatus');
+  if(st) st.textContent = db.tabelaSal.length ? db.tabelaSal.length+' função(ões) cadastrada(s)' : '';
+  if(!db.tabelaSal.length){
+    el.innerHTML='<div style="color:var(--mu);font-size:13px;padding:8px 0">Nenhuma função cadastrada ainda. Clique em "+ Nova Função" para definir os salários.</div>';
+    return;
+  }
+  el.innerHTML=`<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:13px">
+    <thead><tr style="background:var(--bg)">
+      <th style="text-align:left;padding:6px 8px;border-bottom:1px solid var(--bd)">Função</th>
+      <th style="padding:6px 8px;border-bottom:1px solid var(--bd);text-align:right">Salário Base</th>
+      <th style="padding:6px 8px;border-bottom:1px solid var(--bd);text-align:right">V. Alimentação/dia</th>
+      <th style="padding:6px 8px;border-bottom:1px solid var(--bd);text-align:right">V. Transporte/dia</th>
+      <th style="padding:6px 8px;border-bottom:1px solid var(--bd);text-align:center">Pass./dia</th>
+      <th style="padding:6px 8px;border-bottom:1px solid var(--bd);text-align:center">Dias/mês</th>
+      <th style="padding:6px 8px;border-bottom:1px solid var(--bd)">Banco/PIX</th>
+      <th style="padding:6px 8px;border-bottom:1px solid var(--bd)"></th>
+    </tr></thead>
+    <tbody>
+    ${db.tabelaSal.map(r=>`<tr style="border-bottom:1px solid var(--bd)">
+      <td style="padding:7px 8px;font-weight:600">${r.func}</td>
+      <td style="padding:7px 8px;text-align:right;color:#1d4ed8">R$ ${R(r.sal||0)}</td>
+      <td style="padding:7px 8px;text-align:right;color:#059669">R$ ${R(r.ali||0)}</td>
+      <td style="padding:7px 8px;text-align:right;color:#2563eb">R$ ${R(r.vt||0)}</td>
+      <td style="padding:7px 8px;text-align:center">${r.np||2}</td>
+      <td style="padding:7px 8px;text-align:center">${r.dtm||22}</td>
+      <td style="padding:7px 8px;font-size:11px;color:var(--mu)">${r.banco||'—'}</td>
+      <td style="padding:7px 8px;white-space:nowrap">
+        <button class="btn bo bsm" onclick="abrirModalSalario(${r.id})" title="Editar">✏️</button>
+        <button class="btn bsm" style="background:#fee2e2;color:#dc2626;border-color:#fca5a5" onclick="removerSalFunc(${r.id})" title="Remover">🗑️</button>
+      </td>
+    </tr>`).join('')}
+    </tbody></table></div>`;
+}
+
 /* ═══════════════════ FOLHA DE PAGAMENTO ═══════════════════ */
 function renderFolha(){
   const mes = document.getElementById('folhaMes').value || new Date().toISOString().slice(0,7);
@@ -1967,15 +2117,23 @@ function renderFolha(){
   let totalSalBruto=0,totalBeneficios=0,totalDesc=0,totalLiq=0;
 
   const rows = funcs.map(f=>{
-    const salBase = f.sal||0;
-    const diasMes = f.dtm||diasUteis;
-    const salDia = diasMes>0 ? salBase/diasMes : 0;
+    // Buscar dados salariais: prioridade individual → tabela por função → zeros
+    const tabFunc = getSalarioFuncao(f.funcao);
+    const salBase = (f.sal && f.sal>0) ? f.sal : (tabFunc ? tabFunc.sal||0 : 0);
+    const aliDia  = (f.ali && f.ali>0) ? f.ali : (tabFunc ? tabFunc.ali||0 : 0);
+    const vtDia   = (f.vt  && f.vt>0)  ? f.vt  : (tabFunc ? tabFunc.vt||0  : 0);
+    const npDia   = f.np>0 ? f.np : (tabFunc ? tabFunc.np||2 : 2);
+    const diasPadrao = tabFunc ? tabFunc.dtm||22 : 22;
+    const diasMes = (f.dtm && f.dtm>0) ? f.dtm : diasPadrao;
+    const salDia  = diasMes>0 ? salBase/diasMes : 0;
+
+    // Fonte dos dados: 'individual', 'tabela' ou 'sem dados'
+    const fonteDados = (f.sal && f.sal>0) ? '' : tabFunc ? ' (tabela)' : ' ⚠️';
 
     // Contar faltas: dias úteis sem ponto no mês
     const pontoDias = new Set(
       db.ponto.filter(p=>p.fid===f.id && p.dt && p.dt.startsWith(mes)).map(p=>p.dt)
     );
-    // Faltas = dias úteis sem registro
     let faltas = 0;
     const d2=new Date(ano,mesN-1,1);
     const hoje=dHj();
@@ -1987,8 +2145,8 @@ function renderFolha(){
 
     const descFalta = faltas * salDia;
     const diasTrab = Math.max(0, diasMes - faltas);
-    const vali = (f.ali||0) * diasTrab;
-    const vt = (f.vt||0) * (f.np||2) * diasTrab;
+    const vali = aliDia * diasTrab;
+    const vt   = vtDia * npDia * diasTrab;
     const totalBen = vali + vt;
     const liquido = Math.max(0, salBase - descFalta) + totalBen;
 
@@ -1997,21 +2155,24 @@ function renderFolha(){
     totalDesc += descFalta;
     totalLiq += liquido;
 
-    return {f, salBase, faltas, descFalta, vali, vt, totalBen, liquido, diasTrab};
+    return {f, salBase, faltas, descFalta, vali, vt, totalBen, liquido, diasTrab, aliDia, vtDia, npDia, fonteDados};
   });
 
-  document.getElementById('tbFolha').innerHTML = rows.map(({f,salBase,faltas,descFalta,vali,vt,totalBen,liquido})=>`
-    <tr>
+  document.getElementById('tbFolha').innerHTML = rows.map(({f,salBase,faltas,descFalta,vali,vt,totalBen,liquido,aliDia,vtDia,npDia,fonteDados})=>`
+    <tr style="${salBase===0?'background:#fff7ed':''}">
       <td style="font-weight:500">${f.nome}<div style="font-size:10px;color:var(--mu)">${f.mat}${f.banco?' · '+f.banco:''}</div></td>
-      <td style="font-size:12px">${f.funcao||'—'}</td>
-      <td style="font-weight:600">R$ ${R(salBase)}</td>
+      <td style="font-size:12px">${f.funcao||'—'}<span style="font-size:10px;color:var(--mu)">${fonteDados}</span></td>
+      <td style="font-weight:600;color:${salBase===0?'var(--er)':'var(--tx)'}">R$ ${R(salBase)}
+        <div style="font-size:10px;color:var(--mu);font-weight:400">base mensal</div></td>
       <td style="text-align:center;color:${faltas>0?'var(--er)':'var(--mu)'};font-weight:${faltas>0?'700':'400'}">${faltas}</td>
       <td style="color:var(--er)">R$ ${R(descFalta)}</td>
-      <td style="color:#059669">R$ ${R(vali)}</td>
-      <td style="color:#2563eb">R$ ${R(vt)}</td>
+      <td style="color:#059669">R$ ${R(vali)}
+        <div style="font-size:10px;color:var(--mu)">R$ ${R(aliDia)}/dia</div></td>
+      <td style="color:#2563eb">R$ ${R(vt)}
+        <div style="font-size:10px;color:var(--mu)">${npDia}x R$ ${R(vtDia)}/dia</div></td>
       <td style="color:var(--mu)">R$ ${R(totalBen)}</td>
       <td style="font-weight:700;font-size:14px;color:var(--ok)">R$ ${R(liquido)}</td>
-      <td><button class="btn bo bsm" onclick="edtFunc(${f.id})" title="Editar dados salariais">✏️</button></td>
+      <td><button class="btn bo bsm" onclick="edtFunc(${f.id})" title="Editar dados salariais do funcionário">✏️</button></td>
     </tr>`).join('');
 
   document.getElementById('tfFolha').innerHTML=`
@@ -2310,7 +2471,28 @@ function abrirModoFiscalizacao(){
         <span>CAD Engenharia e SST · Gestão de Obras · urbvilabrasil.com.br</span>
         <span>Gerado em ${new Date().toLocaleString('pt-BR')} · Técnico: Everton Diego da Silva Santos</span>
       </div>
-    </body>
+    
+<!-- Modal Tabela Salarial por Função -->
+<div class="ov hidden" id="ovSalFunc"><div class="modal" style="max-width:520px"><div class="mh"><h2 id="salFuncMT">Nova Função Salarial</h2><button class="mcl" onclick="fM('ovSalFunc')">✕</button></div><div class="mb">
+  <div class="fr2">
+    <div class="fg" style="flex:1.5"><label class="fl">Função / Cargo *</label><input id="sf_func" list="listFuncoes" placeholder="Ex: Pedreiro, Servente..."></div>
+    <div class="fg"><label class="fl">Dias/mês (padrão 22)</label><input id="sf_dtm" type="number" value="22" min="1" max="31"></div>
+  </div>
+  <div class="fr2">
+    <div class="fg"><label class="fl">Salário Base (R$)</label><input id="sf_sal" type="number" step="0.01" min="0" placeholder="0,00"></div>
+    <div class="fg"><label class="fl">V. Alimentação / dia (R$)</label><input id="sf_ali" type="number" step="0.01" min="0" placeholder="0,00"></div>
+  </div>
+  <div class="fr2">
+    <div class="fg"><label class="fl">V. Transporte / dia (R$)</label><input id="sf_vt" type="number" step="0.01" min="0" placeholder="0,00"></div>
+    <div class="fg"><label class="fl">Qtd. Passagens / dia</label><input id="sf_np" type="number" value="2" min="0"></div>
+  </div>
+  <div class="fg" style="margin-top:8px"><label class="fl">Banco / Forma de Pagamento</label><input id="sf_banco" placeholder="PIX, boleto, conta..."></div>
+  <input type="hidden" id="sf_id" value="">
+</div>
+<div class="mf"><button class="btn bo" onclick="fM('ovSalFunc')">Cancelar</button><button class="btn bp" onclick="salvarSalFunc()">Salvar</button></div>
+</div></div>
+
+</body>
     </html>`);
   janela.document.close();
 }
