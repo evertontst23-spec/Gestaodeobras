@@ -5182,7 +5182,7 @@ function sincUsuarios(){
 /* Usuários e senhas — altere as senhas após o primeiro acesso */
 /* Senhas com hash SHA-256 + senha texto para compatibilidade */
 const USUARIOS = {
-  'master':     { senha:'CAD@Master#2026',    perfil:'master',     nome:'CAD Master',      label:'🛠️ Master' },
+  'master':     { senha:'master123',          perfil:'master',     nome:'CAD Master',       label:'🛠️ Master' },
   'diretor':    { senha:'FJ@Diretor#2026',    perfil:'diretor',    nome:'Diretoria FJ',     label:'👔 Diretoria' },
   'seguranca':  { senha:'FJ@Seguranca#2026',  perfil:'seguranca',  nome:'Seg. Trabalho FJ', label:'⚡ Seg. Trabalho' },
   'almoxarife': { senha:'FJ@Almo#2026',       perfil:'almoxarife', nome:'Almoxarifado FJ',  label:'📦 Almoxarifado' },
@@ -5219,7 +5219,8 @@ function fazerLogin(){
   }
 
   // Carregar dados
-  const _obras=getObras(); const _primeiraObra=_obras[0]; try{ carregarObra(_primeiraObra.id); }catch(e){ db=criarDbVazio(_primeiraObra); obraAtual=_primeiraObra; }
+  const _obras=getObras(); const _primeiraObra=_obras&&_obras.length?_obras[0]:null;
+  if(_primeiraObra){ try{ carregarObra(_primeiraObra.id); }catch(e){ db=criarDbVazio(_primeiraObra); obraAtual=_primeiraObra; } }
   try{ sincUsuarios(); }catch(e){}
 
   // Esconder login e mostrar app
